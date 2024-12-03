@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "428973781436",
+    "project_id": "tour-management-app-29401",
+    "storage_bucket": "tour-management-app-29401.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:428973781436:android:1e762d66dce3d9ea4cfbb9",
+        "android_client_info": {
+          "package_name": "com.tourmanagement.tour_management_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmexmMfixlfeudw8jaXr6ofVSMZHSeO5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
