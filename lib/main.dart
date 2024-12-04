@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tour_management_app/home_page.dart';
+import 'package:provider/provider.dart';
+import 'package:tour_management_app/providers/user_provider.dart';
+import 'package:tour_management_app/screens/get_started/get_started_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -8,7 +10,11 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+      ChangeNotifierProvider(
+      create: (_) => UserProvider(),)
+  ],
+  child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -18,7 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tour Management App',
-      home: HomePage(),
+      home: GetStartedPage(),
       debugShowCheckedModeBanner: false,
     );
   }
