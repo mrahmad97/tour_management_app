@@ -42,6 +42,7 @@ class UserProvider with ChangeNotifier {
           _user = _user!.copyWith(
             displayName: data['name'],
             userType: data['userType'],
+            phoneNumber: data['phoneNumber'] ?? 'Unknown',
           );
 
           // Notify listeners to update the app UI

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tour_management_app/screens/home_page.dart';
+import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/screens/loginSignup/loginSignup_page.dart';
 import '../../../constants/colors.dart';
 import '../../../constants/strings.dart';
@@ -34,16 +34,12 @@ class _GetStartedPageState extends State<GetStartedPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => LoginSignupPage(),
-      ));
+      Navigator.of(context).pushNamed(AppRoutes.loginSignup);
     }
   }
 
   void _onSkipPressed() {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => LoginSignupPage(),
-    ));
+    Navigator.of(context).pushNamed(AppRoutes.loginSignup);
   }
 
   @override

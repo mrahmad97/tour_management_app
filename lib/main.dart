@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tour_management_app/providers/user_provider.dart';
+import 'package:tour_management_app/screens/create_group_screen/create_group_screen.dart';
 import 'package:tour_management_app/screens/get_started/get_started_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'constants/routes.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -24,7 +26,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tour Management App',
-      home: GetStartedPage(),
+      initialRoute: AppRoutes.getStarted,
+      onGenerateRoute: AppRoutes.generateRoute,
       debugShowCheckedModeBanner: false,
     );
   }

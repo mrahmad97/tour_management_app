@@ -4,6 +4,7 @@ class SignupModel {
   String password;
   String confirmPassword;
   String userType; // Example: "User" or "Manager"
+  String phoneNumber;
 
   SignupModel({
     required this.name,
@@ -11,6 +12,7 @@ class SignupModel {
     required this.password,
     required this.confirmPassword,
     required this.userType,
+    required this.phoneNumber
   });
 
 

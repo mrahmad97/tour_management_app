@@ -2,13 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tour_management_app/screens/home_page.dart';
+import 'package:tour_management_app/constants/routes.dart';
+import 'package:tour_management_app/screens/dashboard/user_home.dart';
 import '../../../constants/colors.dart'; // Ensure AppColors is defined here
 import '../../../constants/strings.dart'; // Ensure Strings.signup is defined here
 import '../../../models/signup_model.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/user_provider.dart';
-import 'custom_text_field.dart'; // Ensure CustomTextFormField is implemented correctly
+import '../../dashboard/home_page.dart';
+import '../../global_components/custom_text_field.dart'; // Ensure CustomTextFormField is implemented correctly
 
 class SignupForm extends StatefulWidget {
   const SignupForm({super.key});
@@ -24,6 +26,8 @@ class _SignupFormState extends State<SignupForm> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+
   String selectedType = 'selectType';
   bool isLoading = false;
 
@@ -75,6 +79,17 @@ class _SignupFormState extends State<SignupForm> {
     }
     return null;
   }
+  String? _validateMobileNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Mobile number is required';
+    }
+    final RegExp regex = RegExp(r'^\+?[0-9]{7,15}$'); // Allows international and local formats
+    if (!regex.hasMatch(value)) {
+      return 'Enter a valid mobile number';
+    }
+    return null;
+  }
+
 
   // Firebase sign up function using SignupModel
   Future<void> _signUp(SignupModel signupModel, BuildContext context) async {
@@ -96,6 +111,7 @@ class _SignupFormState extends State<SignupForm> {
         email: signupModel.email,
         displayName: signupModel.name,
         userType: signupModel.userType,
+        phoneNumber: signupModel.phoneNumber
       );
     // Set the user in the provider
     Provider.of<UserProvider>(context, listen: false).setUser(userModel);
@@ -109,16 +125,18 @@ class _SignupFormState extends State<SignupForm> {
         'email': signupModel.email,
         'userType': signupModel.userType,
         'createdAt': Timestamp.now(),
+        'phoneNumber': signupModel.phoneNumber,
       });
 
 
       // Optionally, fetch user data from Firestore and update UserProvider
       await Provider.of<UserProvider>(context, listen: false).fetchUserData();
 
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => HomePage(),
-      ));
-      // Show success message
+      if(signupModel.userType == 'user'){
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserHome(),));
+      }else{
+        Navigator.of(context).pushNamed(AppRoutes.home);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Signup successful!')),
       );
@@ -203,6 +221,13 @@ class _SignupFormState extends State<SignupForm> {
             controller: confirmPasswordController,
             isPassword: true,
           ),
+          _buildTitle('Contact Number'),
+          const SizedBox(height: 5),
+          CustomTextFormField(
+            hintKey: 'Enter your contact number',
+            validation: _validateMobileNumber,
+            controller: phoneController,
+          ),
           _buildTitle('User Type'),
           const SizedBox(height: 5),
           CustomTextFormField(
@@ -239,6 +264,7 @@ class _SignupFormState extends State<SignupForm> {
                           password: passwordController.text,
                           confirmPassword: confirmPasswordController.text,
                           userType: selectedType,
+                          phoneNumber: phoneController.text
                         );
                         _signUp(signupModel, context);
                       }

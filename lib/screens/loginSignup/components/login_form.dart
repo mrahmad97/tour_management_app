@@ -2,14 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/models/login_model.dart';
-import 'package:tour_management_app/screens/home_page.dart';
+import 'package:tour_management_app/screens/dashboard/user_home.dart';
 
 import '../../../constants/colors.dart'; // Ensure AppColors is defined
 import '../../../constants/strings.dart'; // Ensure Strings.login is defined
 import '../../../models/user_model.dart';
 import '../../../providers/user_provider.dart';
-import 'custom_text_field.dart'; // Ensure CustomTextFormField is implemented correctly
+import '../../global_components/custom_text_field.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -33,8 +34,8 @@ class _LoginFormState extends State<LoginForm> {
 
     try {
       // Sign in user with Firebase Auth
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: loginModel.email,
         password: loginModel.password,
       );
@@ -48,18 +49,44 @@ class _LoginFormState extends State<LoginForm> {
       // Create a UserModel from Firestore data
       UserModel userModel = UserModel(
         uid: userCredential.user!.uid,
-        displayName: userDoc['name'], // Assuming 'name' field in Firestore
+        displayName: userDoc['name'],
+        // Assuming 'name' field in Firestore
         email: userDoc['email'],
-        userType: userDoc['userType'], // Assuming 'userType' field in Firestore
+        userType: userDoc['userType'],
+        // Assuming 'userType' field in Firestore
+        phoneNumber: userDoc['phoneNumber'],
       );
 
       // Update UserProvider with the logged-in user's information
       userProvider.setUser(userModel);
 
-      // Navigate to HomePage after successful login
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
+      // Fetch the groupId where the user is a member
+      // Fetch the groupId where the user is a member
+      String? groupId;
+      if (userDoc['userType'] == 'user') {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('groups')
+            .where('members',
+                arrayContains: userCredential.user!.uid) // Ensure correct field
+            .get();
+
+        // Check if the query returned any documents
+        if (querySnapshot.docs.isNotEmpty) {
+          groupId = querySnapshot.docs.first.id; // Get the groupId
+          print('gorup id ${groupId}');
+        } else {
+          groupId = null; // No group found
+        }
+      }
+
+      // Navigate based on user type and pass the groupId if user
+      if (userDoc['userType'] == 'user') {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => UserHome(groupId: groupId,),
+        ));
+      } else {
+        Navigator.of(context).pushNamed(AppRoutes.home);
+      }
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +114,6 @@ class _LoginFormState extends State<LoginForm> {
       });
     }
   }
-
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
