@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tour_management_app/constants/routes.dart';
@@ -45,6 +46,8 @@ class _LoginFormState extends State<LoginForm> {
           .collection('users')
           .doc(userCredential.user!.uid)
           .get();
+      saveFcmTokenForUser(userCredential.user!.uid);
+
 
       // Create a UserModel from Firestore data
       UserModel userModel = UserModel(
@@ -145,9 +148,14 @@ class _LoginFormState extends State<LoginForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              Strings.login, // Replace with your localized string
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+              Strings.welcomeBack, // Replace with your localized string
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.start,
+            ),
+            Text(
+              Strings.enterCredentials, // Replace with your localized string
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              textAlign: TextAlign.start,
             ),
             const SizedBox(height: 20),
             _buildForm(context),
@@ -156,6 +164,17 @@ class _LoginFormState extends State<LoginForm> {
       ),
     );
   }
+  void saveFcmTokenForUser(String userId) async {
+    String? token = await FirebaseMessaging.instance.getToken();
+
+    if (token != null) {
+      // Store the FCM token in Firestore under the 'users' collection
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'fcmToken': token,
+      }, SetOptions(merge: true)); // Merge to avoid overwriting existing data
+    }
+  }
+
 
   Widget _buildForm(BuildContext context) {
     return Form(

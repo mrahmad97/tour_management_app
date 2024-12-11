@@ -18,7 +18,7 @@ Future<List<Group>> fetchGroupsCreatedByUser(BuildContext context) async {
         .get();
 
     final groups = querySnapshot.docs.map((doc) {
-      return Group.fromMap(doc.data() as Map<String, dynamic>);
+      return Group.fromMap(doc.data());
     }).toList();
 
     return groups;

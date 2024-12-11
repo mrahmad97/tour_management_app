@@ -84,7 +84,7 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                   title: Text(
                     user.uid == currentUser?.uid ? 'You' : (user.displayName ?? 'Unknown'),
                   ),
-                  subtitle: Text(user.email ?? 'No email'),
+                  subtitle: Text(user.email ),
                 );
               },
             );

@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tour_management_app/screens/create_group_screen/create_group_screen.dart';
+import 'package:tour_management_app/functions/push_notification_service.dart';
 import 'package:tour_management_app/screens/dashboard/user_home.dart';
-import 'package:tour_management_app/screens/loginSignup/loginSignup_page.dart';
+import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
+import '../../constants/routes.dart';
 import '../../functions/fetch_groups.dart';
 import '../../functions/fetch_users.dart';
 import '../../models/group_model.dart';
 import '../../models/user_model.dart';
 import '../../providers/user_provider.dart';
+import '../create_group_screen/create_group_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,47 +20,64 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Future<void> handleSignOut(BuildContext context) async {
+    await Provider.of<UserProvider>(context, listen: false).signOut();
+  }
+
   // List to track reselected users
   List<String> reselectedUserIds = [];
 
   @override
   Widget build(BuildContext context) {
     // Use listen: true to rebuild when the user changes
-    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Home"),
+      body: SafeArea(
+        child: ResponsiveWidget(
+            largeScreen: _buildLargeScreen(context),
+            mediumScreen: _buildMediumScreen(context),
+            smallScreen: _buildSmallScreen(context)),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildGroupTiles(context),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => CreateGroupScreen(),
-              ));
-            },
-            child: Text('Create Group'),
-          ),
-          Center(
-            child: userProvider.user != null
-                ? Text('Welcome, ${userProvider.user!.displayName}')
-                : Text('No user signed in'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await userProvider
-                  .signOut(); // This will trigger the sign out method
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => LoginSignupPage(),
-              ));
-            },
-            child: Text('Sign out'),
-          ),
-        ],
-      ),
+    );
+  }
+
+  Widget _buildLargeScreen(BuildContext context) {
+    return Column();
+  }
+
+  Widget _buildMediumScreen(BuildContext context) {
+    return Column();
+  }
+
+  Widget _buildSmallScreen(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Manager Dashboard',),
+        _buildGroupTiles(context),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => CreateGroupScreen(),
+            ));
+          },
+          child: Text('Create Group'),
+        ),
+        Center(
+          child: userProvider.user != null
+              ? Text('Welcome, ${userProvider.user!.displayName}')
+              : Text('No user signed in'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+           await handleSignOut(context);
+            Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+          },
+          child: Text('Sign out'),
+        ),
+      ],
     );
   }
 
@@ -98,7 +117,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                   onTap: () {
                     // Navigate to the UserDashboardScreen with the group.id
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserHome(groupId: group.id,),));
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => UserHome(
+                        groupId: group.id,
+                      ),
+                    ));
+                    // getToken();
                   },
                 );
               },
@@ -196,13 +220,23 @@ class _HomePageState extends State<HomePage> {
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (selectedUserIds.isNotEmpty ||
                         reselectedUserIds.isNotEmpty) {
                       selectedUserIds.addAll(reselectedUserIds);
                       _addMembersToGroup(
                           group.id, selectedUserIds.toSet().toList());
                     }
+                    final tokens =
+                        await Future.wait(groupMembers.map((userId) async {
+                      final userDoc = await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .get();
+                      return userDoc[
+                          'fcmToken']; // Get the FCM token for each user
+                    }));
+                    await sendMemberNotificationToUsers(tokens);
                     Navigator.pop(context); // Close the dialog
                   },
                   child: const Text('Add Members'),

@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
+import '../../../functions/push_notification_service.dart';
 import '../../../models/group_route.dart';
 import '../../../providers/user_provider.dart';
 
 class AddRouteScreen extends StatefulWidget {
   final String? groupId; // The ID of the group to which the route belongs
 
-  const AddRouteScreen({Key? key, this.groupId}) : super(key: key);
+  const AddRouteScreen({super.key, this.groupId});
 
   @override
   State<AddRouteScreen> createState() => _AddRouteScreenState();
@@ -109,6 +110,9 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
       // Add the route to Firestore
       await routesRef.add(newRoute.toMap());
 
+      // Fetch the members' FCM tokens in the group, except the manager
+      await sendGroupUpdateNotification(widget.groupId);
+
       // Clear the form after submission
       _formKey.currentState!.reset();
       _selectedTime = null;
@@ -199,4 +203,68 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
       ),
     );
   }
+
+  // Fetch and send group update notification
+  Future<void> sendGroupUpdateNotification(String? groupId) async {
+    try {
+      if (groupId == null) return;
+
+      // Fetch the group members (excluding the manager)
+      final groupSnapshot = await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(groupId)
+          .get();
+
+      final groupMembers = List<String>.from(groupSnapshot['members']);
+
+      // Remove the manager from the list (assuming manager's UID is stored in group data)
+      final managerUid = groupSnapshot['createdBy'];  // Assuming the manager UID is stored
+      groupMembers.remove(managerUid);
+
+      // Fetch FCM tokens of the group members (excluding the manager)
+      final tokens = await Future.wait(groupMembers.map((userId) async {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+        return userDoc['fcmToken']; // Get the FCM token for each user
+      }));
+
+      // Send FCM notifications to the users (excluding the manager)
+      if (tokens.isNotEmpty) {
+        await sendNotificationToUsers(tokens);
+      }
+    } catch (e) {
+      print('Error sending group update notification: $e');
+    }
+  }
+
+//   Future<void> sendNotificationToUsers(List<dynamic> tokens) async {
+//     try {
+//       // Define the FCM notification payload
+//       final message = {
+//         "registration_ids": tokens,
+//         "notification": {
+//           "title": "New Route Added",
+//           "body": "A new route has been added to your group. Check it out!"
+//         },
+//         "priority": "high",
+//       };
+//
+//       // Send the notification via Firebase Cloud Messaging (FCM)
+//       final response = await http.post(
+//         Uri.parse('https://fcm.googleapis.com/fcm/send'),
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'Authorization': 'firebase-adminsdk-gzl21@tour-management-app-29401.iam.gserviceaccount.com', // Replace with your Firebase server key
+//         },
+//         body: json.encode(message),
+//       );
+//
+//       if (response.statusCode == 200) {
+//         print('Notification sent successfully!');
+//       } else {
+//         print('Failed to send notification: ${response.body}');
+//       }
+//     } catch (e) {
+//       print('Error sending notification: $e');
+//     }
+//   }
 }

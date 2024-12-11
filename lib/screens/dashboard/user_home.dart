@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tour_management_app/constants/colors.dart';
 import 'package:tour_management_app/constants/routes.dart';
-import 'package:tour_management_app/screens/dashboard_navigation_screens/emergency_contacts/emergency_contact_screen.dart';
-import 'package:tour_management_app/screens/dashboard_navigation_screens/expense_screen/Expense_screen.dart';
-import 'package:tour_management_app/screens/dashboard_navigation_screens/group_members_screen.dart';
-import 'package:tour_management_app/screens/dashboard_navigation_screens/routes_screen/route_display_screen.dart';
 
-import '../dashboard_navigation_screens/chat_screen.dart';
-import '../dashboard_navigation_screens/profile_screen.dart';
 
 class UserHome extends StatefulWidget {
   final String? groupId;
@@ -23,11 +17,10 @@ class _UserHomeState extends State<UserHome> {
     return [
       {
         'title': 'Chat',
-        'navigateTo': () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ChatScreen(
-                groupId: widget.groupId,
-              ),
-            )),
+        'navigateTo': () => Navigator.of(context).pushNamed(
+          AppRoutes.chat,
+          arguments: widget.groupId,
+        ),
         'icon': Icons.chat,
       },
       {
@@ -38,55 +31,48 @@ class _UserHomeState extends State<UserHome> {
       },
       {
         'title': 'Group Members',
-        'navigateTo': () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => GroupMembersScreen(
-                groupId: widget.groupId,
-              ),
-            )),
+        'navigateTo': () => Navigator.of(context).pushNamed(
+          AppRoutes.groupMembers,
+          arguments: widget.groupId,
+        ),
         'icon': Icons.group,
       },
       {
         'title': 'Route',
-        'navigateTo': () =>
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => RouteDisplayScreen(
-                groupId: widget.groupId,
-              ),
-            )),
+        'navigateTo': () => Navigator.of(context).pushNamed(
+          AppRoutes.routeDisplay,
+          arguments: widget.groupId,
+        ),
         'icon': Icons.map,
       },
       {
         'title': 'Emergency Contact',
         'navigateTo': () =>
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => EmergencyContactsScreen(),)),
+            Navigator.of(context).pushNamed(AppRoutes.emergencyContact),
         'icon': Icons.contact_phone,
       },
       {
         'title': 'Profile',
-        'navigateTo': () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => ProfileScreen(
-            groupId: widget.groupId,
-          ),
-        )),
+        'navigateTo': () => Navigator.of(context).pushNamed(
+          AppRoutes.profile,
+          arguments: {'groupId': widget.groupId},
+        ),
         'icon': Icons.person,
       },
       {
         'title': 'Expense',
-        'navigateTo': () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => AddExpenseScreen(
-            groupId: widget.groupId,
-          ),
-        )),
+        'navigateTo': () => Navigator.of(context).pushNamed(
+          AppRoutes.addExpense,
+          arguments: widget.groupId,
+        ),
         'icon': Icons.attach_money,
       },
       {
         'title': 'Manager Details',
-        'navigateTo': () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => ProfileScreen(
-            groupId: widget.groupId,
-            isManagerProfile: true,
-          ),
-        )),
+        'navigateTo': () => Navigator.of(context).pushNamed(
+          AppRoutes.managerDetails,
+          arguments: widget.groupId,
+        ),
         'icon': Icons.business_center,
       },
     ];
@@ -94,10 +80,7 @@ class _UserHomeState extends State<UserHome> {
 
   @override
   Widget build(BuildContext context) {
-    // Retrieve the groupId from the arguments
-
     final groupId = widget.groupId;
-    print('group id on user home ${groupId}');
 
     final features = getFeatures(context);
     return Scaffold(
@@ -106,22 +89,21 @@ class _UserHomeState extends State<UserHome> {
         child: Column(
           children: [
             groupId == null
-                ? Text(
-                    'You are not present in any group, kindly contact your manager.')
-                : SizedBox(),
+                ? const Text(
+              'You are not present in any group, kindly contact your manager.',
+            )
+                : const SizedBox(),
             Expanded(
               child: GridView.builder(
                 padding: const EdgeInsets.all(16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Number of items in a row
+                  crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
                 itemCount: features.length,
-                // Use the correct length of the features list
                 itemBuilder: (context, index) {
-                  final feature = features[
-                      index]; // Access the feature at the current index
+                  final feature = features[index];
                   return GestureDetector(
                     onTap: feature['navigateTo'],
                     child: SizedBox(

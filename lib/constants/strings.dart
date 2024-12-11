@@ -5,5 +5,8 @@ class Strings {
   static const String thirdTitle = 'Your next great journey is just a click away—let\'s dive in!';
   static const String login = 'Login';
   static const String signup = 'Signup';
+  static const String createNew = 'Create a new account...';
+  static const String welcomeBack  = 'Welcome Back';
+  static const String enterCredentials = 'Enter your login credentials...';
 
 }

@@ -46,6 +46,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .add(chatMessage.toMap());
 
       _messageController.clear();
+
     } catch (e) {
       print("Error sending message: $e");
     }

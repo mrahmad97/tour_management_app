@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tour_management_app/constants/routes.dart';
-import 'package:tour_management_app/screens/loginSignup/loginSignup_page.dart';
 import '../../../constants/colors.dart';
 import '../../../constants/strings.dart';
 
@@ -135,14 +134,14 @@ class _GetStartedPageState extends State<GetStartedPage> {
                   // Next Button
                   ElevatedButton(
                     onPressed: _onNextPressed,
+                    style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.surfaceColor,
+                        backgroundColor: AppColors.primaryColor),
                     child: Text(
                       _currentIndex == imagePaths.length - 1
                           ? 'Finish'
                           : 'Next',
                     ),
-                    style: ElevatedButton.styleFrom(
-                        foregroundColor: AppColors.surfaceColor,
-                        backgroundColor: AppColors.primaryColor),
                   ),
                 ],
               ),

@@ -9,7 +9,7 @@ import '../../../models/expense_model.dart';
 class AddExpenseScreen extends StatefulWidget {
   final String? groupId;
 
-  const AddExpenseScreen({Key? key, this.groupId}) : super(key: key);
+  const AddExpenseScreen({super.key, this.groupId});
 
   @override
   _AddExpenseScreenState createState() => _AddExpenseScreenState();

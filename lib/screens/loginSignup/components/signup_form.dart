@@ -9,8 +9,7 @@ import '../../../constants/strings.dart'; // Ensure Strings.signup is defined he
 import '../../../models/signup_model.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/user_provider.dart';
-import '../../dashboard/home_page.dart';
-import '../../global_components/custom_text_field.dart'; // Ensure CustomTextFormField is implemented correctly
+import '../../global_components/custom_text_field.dart';
 
 class SignupForm extends StatefulWidget {
   const SignupForm({super.key});
@@ -28,7 +27,7 @@ class _SignupFormState extends State<SignupForm> {
       TextEditingController();
   final TextEditingController phoneController = TextEditingController();
 
-  String selectedType = 'selectType';
+  String selectedType = 'Select Type';
   bool isLoading = false;
 
   @override
@@ -173,9 +172,9 @@ class _SignupFormState extends State<SignupForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              Strings.signup,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+              Strings.createNew,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.start,
             ),
             const SizedBox(height: 20),
             _buildForm(context),
@@ -234,12 +233,12 @@ class _SignupFormState extends State<SignupForm> {
             hintKey: 'Select user type',
             isDropdown: true,
             dropdownItems: [
-              'selectType',
-              'user',
-              'manager',
+              'Select Type',
+              'User',
+              'Manager',
             ],
             validation: (value) {
-              if (value == null || value == 'selectType') {
+              if (value == null || value == 'Select Type') {
                 return 'Please select a user type.';
               }
               return null;
