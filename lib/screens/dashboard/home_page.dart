@@ -32,30 +32,113 @@ class _HomePageState extends State<HomePage> {
     // Use listen: true to rebuild when the user changes
 
     return Scaffold(
-      body: SafeArea(
-        child: ResponsiveWidget(
-            largeScreen: _buildLargeScreen(context),
-            mediumScreen: _buildMediumScreen(context),
-            smallScreen: _buildSmallScreen(context)),
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: ResponsiveWidget(
+              largeScreen: _buildLargeScreen(context),
+              mediumScreen: _buildMediumScreen(context),
+              smallScreen: _buildSmallScreen(context)),
+        ),
       ),
     );
   }
 
   Widget _buildLargeScreen(BuildContext context) {
-    return Column();
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildTitle(context),
+        Row(
+          children: [
+            SizedBox(
+                width: MediaQuery.of(context).size.width * 1 / 2,
+                height: MediaQuery.of(context).size.height,
+                child: _buildGroupTiles(context)),
+            Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => CreateGroupScreen(),
+                    ));
+                  },
+                  child: Text('Create Group'),
+                ),
+                Center(
+                  child: userProvider.user != null
+                      ? Text('Welcome, ${userProvider.user!.displayName}')
+                      : Text('No user signed in'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await handleSignOut(context);
+                    Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+                  },
+                  child: Text('Sign out'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _buildMediumScreen(BuildContext context) {
-    return Column();
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildTitle(context),
+        Row(
+          children: [
+            SizedBox(
+                width: MediaQuery.of(context).size.width * 1 / 2,
+                height: MediaQuery.of(context).size.height,
+                child: _buildGroupTiles(context)),
+            Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => CreateGroupScreen(),
+                    ));
+                  },
+                  child: Text('Create Group'),
+                ),
+                Center(
+                  child: userProvider.user != null
+                      ? Text('Welcome, ${userProvider.user!.displayName}')
+                      : Text('No user signed in'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await handleSignOut(context);
+                    Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+                  },
+                  child: Text('Sign out'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _buildSmallScreen(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text('Manager Dashboard',),
+        _buildTitle(context),
         _buildGroupTiles(context),
         ElevatedButton(
           onPressed: () {
@@ -72,7 +155,7 @@ class _HomePageState extends State<HomePage> {
         ),
         ElevatedButton(
           onPressed: () async {
-           await handleSignOut(context);
+            await handleSignOut(context);
             Navigator.of(context).pushNamed(AppRoutes.loginSignup);
           },
           child: Text('Sign out'),
@@ -264,5 +347,13 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Error adding members: $e');
     }
+  }
+
+  Widget _buildTitle(BuildContext context) {
+    return Text(
+      'Manager Dashboard',
+      style: TextStyle(
+          fontSize: ResponsiveWidget.isSmallScreen(context) ? 16 : 20,fontWeight: FontWeight.bold),
+    );
   }
 }

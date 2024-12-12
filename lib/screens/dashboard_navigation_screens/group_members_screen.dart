@@ -61,6 +61,8 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Group Members'),
+        automaticallyImplyLeading: false,
+
       ),
       body: SafeArea(
         child: FutureBuilder<List<UserModel>>(

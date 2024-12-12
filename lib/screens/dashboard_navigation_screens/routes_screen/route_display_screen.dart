@@ -24,11 +24,13 @@ class _RouteDisplayScreenState extends State<RouteDisplayScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Route Display Screen'),
+        automaticallyImplyLeading: false,
+
       ),
-      body: Column(
+      body: groupId == null || user == null ? Center(child: Text('An Error occured'),):Column(
         children: [
           // Add Routes Button (only for managers)
-          if (user.userType == 'manager')
+          user.userType == 'manager' ?
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -36,7 +38,7 @@ class _RouteDisplayScreenState extends State<RouteDisplayScreen> {
                 ));
               },
               child: const Text('Add Routes'),
-            ),
+            ) : SizedBox() ,
 
           const SizedBox(height: 10),
 

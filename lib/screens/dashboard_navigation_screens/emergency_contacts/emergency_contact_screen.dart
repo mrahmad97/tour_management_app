@@ -20,6 +20,8 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Emergency Contacts'),
+        automaticallyImplyLeading: false,
+
       ),
       body: Column(
         children: [

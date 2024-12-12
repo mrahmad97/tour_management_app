@@ -50,6 +50,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Expense'),
+        automaticallyImplyLeading: false,
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
