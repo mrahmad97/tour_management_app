@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tour_management_app/constants/routes.dart';
 import '../../../constants/colors.dart';
 import '../../../constants/strings.dart';
+import '../../main.dart';
 
 class GetStartedPage extends StatefulWidget {
   const GetStartedPage({super.key});
@@ -33,12 +34,12 @@ class _GetStartedPageState extends State<GetStartedPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+      NavigationService.navigatorKey.currentState?.pushNamed(AppRoutes.loginSignup);
     }
   }
 
   void _onSkipPressed() {
-    Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+    NavigationService.navigatorKey.currentState?.pushNamed(AppRoutes.loginSignup);
   }
 
   @override

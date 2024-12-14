@@ -4,15 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/screens/dashboard/user_home.dart';
-import '../../../constants/colors.dart'; // Ensure AppColors is defined here
-import '../../../constants/strings.dart'; // Ensure Strings.signup is defined here
+import '../../../constants/colors.dart';
+import '../../../constants/strings.dart';
+import '../../../main.dart';
 import '../../../models/signup_model.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/user_provider.dart';
 import '../../global_components/custom_text_field.dart';
+import '../../global_components/responsive_widget.dart';
 
 class SignupForm extends StatefulWidget {
-  const SignupForm({super.key});
+  final void Function(int) switchPage;
+
+  const SignupForm({super.key, required this.switchPage});
 
   @override
   State<SignupForm> createState() => _SignupFormState();
@@ -78,17 +82,18 @@ class _SignupFormState extends State<SignupForm> {
     }
     return null;
   }
+
   String? _validateMobileNumber(String? value) {
     if (value == null || value.isEmpty) {
       return 'Mobile number is required';
     }
-    final RegExp regex = RegExp(r'^\+?[0-9]{7,15}$'); // Allows international and local formats
+    final RegExp regex =
+        RegExp(r'^\+?[0-9]{7,15}$'); // Allows international and local formats
     if (!regex.hasMatch(value)) {
       return 'Enter a valid mobile number';
     }
     return null;
   }
-
 
   // Firebase sign up function using SignupModel
   Future<void> _signUp(SignupModel signupModel, BuildContext context) async {
@@ -106,14 +111,13 @@ class _SignupFormState extends State<SignupForm> {
 
       // Create a UserModel with Firebase Auth user and additional details
       UserModel userModel = UserModel(
-        uid: userCredential.user!.uid,
-        email: signupModel.email,
-        displayName: signupModel.name,
-        userType: signupModel.userType,
-        phoneNumber: signupModel.phoneNumber
-      );
-    // Set the user in the provider
-    Provider.of<UserProvider>(context, listen: false).setUser(userModel);
+          uid: userCredential.user!.uid,
+          email: signupModel.email,
+          displayName: signupModel.name,
+          userType: signupModel.userType,
+          phoneNumber: signupModel.phoneNumber);
+      // Set the user in the provider
+      Provider.of<UserProvider>(context, listen: false).setUser(userModel);
 
       // Store additional data in Firestore
       await FirebaseFirestore.instance
@@ -122,23 +126,26 @@ class _SignupFormState extends State<SignupForm> {
           .set({
         'name': signupModel.name,
         'email': signupModel.email,
-        'userType': signupModel.userType,
+        'userType': signupModel.userType.toLowerCase(),
         'createdAt': Timestamp.now(),
         'phoneNumber': signupModel.phoneNumber,
+        'imageURL': signupModel.imageURL
       });
-
 
       // Optionally, fetch user data from Firestore and update UserProvider
       await Provider.of<UserProvider>(context, listen: false).fetchUserData();
 
-      if(signupModel.userType == 'user'){
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserHome(),));
+      if (signupModel.userType.toLowerCase() == 'user') {
+        NavigationService.navigatorKey.currentState?.pushNamed(AppRoutes.userHome
+        );
+      } else if (signupModel.userType.toLowerCase() == 'manager'){
+        NavigationService.navigatorKey.currentState?.pushNamed(AppRoutes.home);
       }else{
-        Navigator.of(context).pushNamed(AppRoutes.home);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Signup failed')),
+        );
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Signup successful!')),
-      );
+
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'weak-password') {
@@ -176,8 +183,29 @@ class _SignupFormState extends State<SignupForm> {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.start,
             ),
+            Text(
+              Strings.enterCredentialsforNewACC,
+              // Replace with your localized string
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              textAlign: TextAlign.start,
+            ),
             const SizedBox(height: 20),
             _buildForm(context),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Already have an account?  '),
+                GestureDetector(
+                    onTap: () => widget.switchPage(0),
+                    child: Text(
+                      "Login",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )),
+              ],
+            )
           ],
         ),
       ),
@@ -252,24 +280,35 @@ class _SignupFormState extends State<SignupForm> {
           const SizedBox(height: 20),
           Center(
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  minimumSize: Size(
+                      ResponsiveWidget.isLargeScreen(context)
+                          ? MediaQuery.of(context).size.width * 1 / 2
+                          : MediaQuery.of(context).size.width * 2 / 3,
+                      ResponsiveWidget.isLargeScreen(context) ? 50 : 40),
+                  foregroundColor: AppColors.surfaceColor,
+                  backgroundColor: AppColors.primaryColor),
               onPressed: isLoading
                   ? null
                   : () {
                       if (_formKey.currentState?.validate() == true) {
                         // Create SignupModel and call _signUp
                         SignupModel signupModel = SignupModel(
-                          name: nameController.text,
-                          email: emailController.text,
-                          password: passwordController.text,
-                          confirmPassword: confirmPasswordController.text,
-                          userType: selectedType,
-                          phoneNumber: phoneController.text
+                            name: nameController.text,
+                            email: emailController.text,
+                            password: passwordController.text,
+                            confirmPassword: confirmPasswordController.text,
+                            userType: selectedType,
+                            phoneNumber: phoneController.text,
+                          imageURL: '',
                         );
                         _signUp(signupModel, context);
                       }
                     },
               child: isLoading
-                  ? const CircularProgressIndicator()
+                  ? const CircularProgressIndicator(
+                      color: AppColors.surfaceColor,
+                    )
                   : const Text('Signup'),
             ),
           ),

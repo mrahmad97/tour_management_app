@@ -8,5 +8,7 @@ class Strings {
   static const String createNew = 'Create a new account...';
   static const String welcomeBack  = 'Welcome Back';
   static const String enterCredentials = 'Enter your login credentials...';
+  static const String enterCredentialsforNewACC = 'Enter your credentials to create new account...';
+
 
 }

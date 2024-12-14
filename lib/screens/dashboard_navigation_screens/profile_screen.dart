@@ -7,7 +7,8 @@ import '../../providers/user_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? groupId; // If null, display current user's profile
-  final bool isManagerProfile; // Indicates whether to fetch the manager's profile
+  final bool
+      isManagerProfile; // Indicates whether to fetch the manager's profile
 
   const ProfileScreen({super.key, this.groupId, this.isManagerProfile = false});
 
@@ -89,33 +90,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: userProfile == null
           ? const Center(child: Text('User not found.'))
           : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: null, // Add photo URL handling here
-              child: const Icon(Icons.person, size: 50),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: null, // Add photo URL handling here
+                    child: const Icon(Icons.person, size: 50),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    userProfile.displayName ?? 'No Name',
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Email: ${userProfile.email}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Phone: ${userProfile.phoneNumber}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              userProfile.displayName ?? 'No Name',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Email: ${userProfile.email}',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Phone: ${userProfile.phoneNumber}',
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

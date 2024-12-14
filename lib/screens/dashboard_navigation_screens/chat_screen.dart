@@ -1,14 +1,21 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-
+import 'package:tour_management_app/constants/colors.dart';
+import '../../functions/media_upload_download.dart';
+import '../../functions/push_notification_service.dart';
 import '../../models/chat_model.dart';
 import '../../providers/user_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String? groupId; // Group ID for this chat screen
+  final String? groupId;
 
-  const ChatScreen({super.key, this.groupId});
+  const ChatScreen({super.key, required this.groupId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -16,27 +23,54 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final FocusNode _messageFocusNode = FocusNode(); // FocusNode for the text field
   late final UserProvider userProvider;
+  final MediaUploadDownload mediaHandler = MediaUploadDownload();
+  dynamic _pickedImage; // Store the picked image
+  String _imageName = ''; // Display the image name before sending
+
+  // Function to request necessary permissions
+  Future<void> requestPermissions() async {
+    if (!kIsWeb) {
+      await Permission.storage.request();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     userProvider = Provider.of<UserProvider>(context, listen: false);
+    requestPermissions();
   }
 
-  // Send a message to Firestore
-  Future<void> sendMessage(String message) async {
-    if (message.trim().isEmpty) return;
+  // Function to handle sending text messages
+  Future<void> _sendTextMessage() async {
+    final messageText = _messageController.text.trim();
+    if (messageText.isNotEmpty || _pickedImage != null) {
+      String? imageUrl;
 
-    try {
+      // If an image is picked, upload it first
+      if (_pickedImage != null) {
+        imageUrl = await mediaHandler.uploadImageToSupabase(_pickedImage);
+        if (imageUrl == null) {
+          print("Image upload failed.");
+          return;
+        }
+        print("Image uploaded successfully. URL: $imageUrl");
+      }
+
+
+      // Send the message to Firebase Firestore with the image URL (if available)
+      // Create the message using the ChatModel
       final chatMessage = ChatModel(
         groupId: widget.groupId,
         senderId: userProvider.user?.uid,
-        message: message,
+        message: messageText.isNotEmpty ? messageText : null,
+        mediaUrl: imageUrl,
         timestamp: DateTime.now(),
+        isRead: false,
         isSent: true,
         isDelivered: false,
-        isRead: false,
       );
 
       await FirebaseFirestore.instance
@@ -45,68 +79,101 @@ class _ChatScreenState extends State<ChatScreen> {
           .collection('messages')
           .add(chatMessage.toMap());
 
-      _messageController.clear();
+      // Fetch the group members (excluding the manager)
+      final groupSnapshot = await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(widget.groupId)
+          .get();
 
-    } catch (e) {
-      print("Error sending message: $e");
+      final groupMembers = List<String>.from(groupSnapshot['members']);
+
+
+
+
+      // Fetch FCM tokens of the group members (excluding the manager)
+      final tokens = await Future.wait(groupMembers.map((userId) async {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+        return userDoc['fcmToken']; // Get the FCM token for each user
+      }));
+
+      await sendChatNotificationToUsers(tokens,userProvider.user?.displayName,messageText, widget.groupId);
+
+      _messageController.clear();
+      setState(() {
+        _pickedImage = null; // Clear picked image after sending
+        _imageName = ''; // Reset image name
+      });
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chat'),
-        automaticallyImplyLeading: false,
-      ),
-      body: Column(
+  // Function to handle image attachment and display image name
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // First perform async work
+      final imageBytes = kIsWeb
+          ? await pickedFile.readAsBytes() // For web: read bytes
+          : null; // For mobile/desktop: image will be a File, no need to read bytes here
+
+      // Then update the state
+      setState(() {
+        _pickedImage = kIsWeb
+            ? imageBytes
+            : File(pickedFile.path); // Set the image based on platform
+        _imageName = pickedFile.name; // Store the image name
+      });
+    } else {
+      print('No image selected.');
+    }
+  }
+
+  // Widget to build the input field
+  Widget _buildMessageInputField() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
         children: [
-          // Message List
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('chats')
-                  .doc(widget.groupId)
-                  .collection('messages')
-                  .orderBy('timestamp', descending: true) // Fetch latest messages first
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+            child: GestureDetector(
+              onTap: () {
+                if (!kIsWeb) {
+                  _messageFocusNode.requestFocus(); // Focus the text field
                 }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No messages yet.'));
-                }
-
-                final messages = snapshot.data!.docs.map((doc) {
-                  return ChatModel.fromMap(doc.data() as Map<String, dynamic>);
-                }).toList();
-
-                return ListView.builder(
-                  reverse: true, // Display latest messages at the bottom
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == userProvider.user?.uid;
-
-                    return _buildMessageBubble(message, isMe);
-                  },
-                );
               },
+              child: TextField(
+                controller: _messageController,
+                focusNode: _messageFocusNode,
+                decoration: const InputDecoration(
+                  hintText: 'Type a message...',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.text,
+                onTap: () {
+                  if (!kIsWeb) {
+                    FocusScope.of(context).requestFocus(_messageFocusNode);
+                  }
+                },
+              ),
             ),
           ),
-
-          // Input Field
-          _buildMessageInputField(),
+          if (_imageName.isNotEmpty)
+            Text(_imageName), // Display the picked image name
+          IconButton(
+            icon: const Icon(Icons.attach_file),
+            onPressed: _pickImage,
+          ),
+          IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: _sendTextMessage,
+          ),
         ],
       ),
     );
   }
 
-  // Message bubble widget
+  // Widget to build message bubbles
   Widget _buildMessageBubble(ChatModel message, bool isMe) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -114,79 +181,107 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: isMe ? Colors.blue[100] : Colors.grey[300],
+          color: isMe ? AppColors.primaryColor : AppColors.cardBackgroundColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
-          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            // Display sender's name if available
-            FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance.collection('users').doc(message.senderId).get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox.shrink();
-                }
-                if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
-                  return const Text(
-                    'Unknown User',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  );
-                }
-                final senderName = snapshot.data!['name'] ?? 'Unknown User';
-                return Text(
-                  senderName,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                );
-              },
-            ),
-
-            // Display media if available
-            if (message.mediaUrl != null)
-              Image.network(message.mediaUrl!, height: 150, width: 150, fit: BoxFit.cover),
-
-            // Display message content
+            if (message.mediaUrl != null && message.mediaUrl!.isNotEmpty)
+              isMe
+                  ? Image.network(message.mediaUrl!,
+                      height: 150,
+                      width: 150,
+                      fit: BoxFit.cover) // Display local image for self
+                  : GestureDetector(
+                      onTap: () {
+                        // Add download functionality for others
+                        print('Download link: ${message.mediaUrl}');
+                      },
+                      child: Image.network(message.mediaUrl!,
+                          height: 150, width: 150, fit: BoxFit.cover),
+                    ),
             if (message.message != null)
               Text(
                 message.message!,
-                style: const TextStyle(fontSize: 16),
+                style: TextStyle(
+                    color:
+                        isMe ? AppColors.surfaceColor : AppColors.primaryColor),
               ),
-
-            const SizedBox(height: 5),
-
-            // Display timestamp
             Text(
-              message.timestamp?.toString() ?? '',
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
+              message.timestamp != null
+                  ? DateFormat('hh:mm a').format(message.timestamp!)
+                  : '',
+              style: TextStyle(
+                  fontSize: 10,
+                  color:
+                      isMe ? AppColors.surfaceColor : AppColors.primaryColor),
             ),
           ],
         ),
       ),
     );
   }
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _messageFocusNode.dispose(); // Dispose the FocusNode
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus(); // Dismiss keyboard when tapping outside
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Chat', style: TextStyle(color: AppColors.surfaceColor)),
+          backgroundColor: AppColors.primaryColor,
+        ),
+        backgroundColor: AppColors.surfaceColor,
+        resizeToAvoidBottomInset: true, // Enable resizing to avoid bottom inset
+        body: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('chats')
+                    .doc(widget.groupId)
+                    .collection('messages')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('No messages yet.'));
+                  }
 
-  // Message input field widget
-  Widget _buildMessageInputField() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: 'Type a message...',
-                border: OutlineInputBorder(),
+                  final messages = snapshot.data!.docs.map((doc) {
+                    return ChatModel.fromMap(doc.data() as Map<String, dynamic>);
+                  }).toList();
+
+                  return ListView.builder(
+                    reverse: true,
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isMe = message.senderId == userProvider.user?.uid;
+                      return _buildMessageBubble(message, isMe);
+                    },
+                  );
+                },
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: () => sendMessage(_messageController.text),
-          ),
-        ],
+            _buildMessageInputField(), // Input field stays at the bottom
+          ],
+        ),
       ),
     );
   }
+
 }

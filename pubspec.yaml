@@ -47,6 +47,11 @@ dependencies:
   googleapis: ^13.2.0
   googleapis_auth: ^1.6.0
   universal_platform: ^1.1.0
+  intl: ^0.20.1
+  permission_handler: ^11.3.1
+  file_picker: ^8.0.0
+  image_picker: ^1.1.2
+  supabase_flutter: ^2.8.1
 
 dev_dependencies:
   flutter_test:

@@ -38,7 +38,7 @@ class PushNotificationService {
   }
 }
 
-Future<void> sendNotificationToUsers(List<dynamic> tokens) async {
+Future<void> sendNotificationToUsers(List<dynamic> tokens, String groupId) async {
   try {
     final String accessToken = await PushNotificationService.getAccessToken();
 
@@ -49,6 +49,10 @@ Future<void> sendNotificationToUsers(List<dynamic> tokens) async {
           "notification": {
             "title": "New Route Added",
             "body": "A new route has been added to your group. Check it out!",
+          },
+          "data": {
+            "type": "route", // Add custom fields here
+            "groupId": groupId, // Example custom field
           },
         },
       };
@@ -78,7 +82,7 @@ Future<void> sendNotificationToUsers(List<dynamic> tokens) async {
   }
 }
 
-Future<void> sendMemberNotificationToUsers(List<dynamic> tokens) async {
+Future<void> sendMemberNotificationToUsers(List<dynamic> tokens, String groupId) async {
   try {
     final String accessToken = await PushNotificationService.getAccessToken();
 
@@ -89,6 +93,55 @@ Future<void> sendMemberNotificationToUsers(List<dynamic> tokens) async {
           "notification": {
             "title": "A New Member Added to Group",
             "body": "A new member has been added to your group. Check it out!",
+          },
+          "data": {
+            "type": "groupMember", // Add custom fields here
+            "groupId": groupId, // Example custom field
+          },
+        },
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse(
+              'https://fcm.googleapis.com/v1/projects/tour-management-app-29401/messages:send'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $accessToken',
+          },
+          body: json.encode(message),
+        );
+
+        if (response.statusCode == 200) {
+          print('Notification sent successfully to token $token!');
+        } else {
+          print('Failed to send notification to token $token: ${response.body}');
+        }
+      } catch (e) {
+        print('Error sending notification to token $token: $e');
+      }
+    }
+  } catch (e) {
+    print('Error in sending notifications: $e');
+  }
+}
+
+
+Future<void> sendChatNotificationToUsers(List<dynamic> tokens, String? user, String text, String? groupId) async {
+  try {
+    final String accessToken = await PushNotificationService.getAccessToken();
+
+    for (String token in tokens) {
+      final message = {
+        "message": {
+          "token": token,
+          "notification": {
+            "title": user,
+            "body": text,
+          },
+          "data": {
+            "type": "chat", // Add custom fields here
+            "groupId": groupId, // Example custom field
           },
         },
       };

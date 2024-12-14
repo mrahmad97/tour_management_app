@@ -2,12 +2,36 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/material.dart';
+import 'package:tour_management_app/main.dart';
 
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print(message.notification?.title);
   print(message.notification?.body);
   print(message.data);
+  final data = message.data;
+  final type = data['type'];
+
+  // Navigate based on the notification type
+  if (type == 'route') {
+    NavigationService.navigatorKey.currentState?.pushNamed(
+      '/routeDetails',
+      arguments: data,
+    );
+  } else if (type == 'groupMember') {
+    NavigationService.navigatorKey.currentState?.pushNamed(
+      '/groupDetails',
+      arguments: data,
+    );
+  } else if (type == 'chat') {
+    NavigationService.navigatorKey.currentState?.pushNamed(
+      '/chat',
+      arguments: data,
+    );
+  } else {
+    print('Unknown notification type: $type');
+  }
 }
 
 class FirebaseApi {
@@ -20,6 +44,29 @@ class FirebaseApi {
 
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
+
+    final data = message.data;
+    final type = data['type'];
+
+    // Navigate based on the notification type
+    if (type == 'route') {
+       NavigationService.navigatorKey.currentState?.pushNamed(
+         '/routeDetails',
+         arguments: data,
+       );
+     } else if (type == 'groupMember') {
+      NavigationService.navigatorKey.currentState?.pushNamed(
+         '/groupDetails',
+         arguments: data,
+       );
+     } else if (type == 'chat') {
+      NavigationService.navigatorKey.currentState?.pushNamed(
+         '/chat',
+         arguments: data,
+       );
+     } else {
+       print('Unknown notification type: $type');
+     }
   }
 
   Future initLocalNotifications() async {
@@ -42,7 +89,7 @@ class FirebaseApi {
       FirebaseMessaging.onMessage.listen((message) {
         // Handle foreground messages for web
         print('Web: Received a foreground message');
-        print('Message data: ${message.data}');
+        print('Message data: $message');
 
       });
     } else {

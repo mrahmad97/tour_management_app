@@ -6,15 +6,19 @@ import 'package:provider/provider.dart';
 import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/models/login_model.dart';
 import 'package:tour_management_app/screens/dashboard/user_home.dart';
+import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
 
 import '../../../constants/colors.dart'; // Ensure AppColors is defined
 import '../../../constants/strings.dart'; // Ensure Strings.login is defined
+import '../../../main.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/user_provider.dart';
 import '../../global_components/custom_text_field.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+  final void Function(int) switchPage;
+
+  const LoginForm({super.key, required this.switchPage});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -47,7 +51,6 @@ class _LoginFormState extends State<LoginForm> {
           .doc(userCredential.user!.uid)
           .get();
       saveFcmTokenForUser(userCredential.user!.uid);
-
 
       // Create a UserModel from Firestore data
       UserModel userModel = UserModel(
@@ -83,9 +86,12 @@ class _LoginFormState extends State<LoginForm> {
       }
 
       // Navigate based on user type and pass the groupId if user
-      if (userDoc['userType'] == 'user') {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => UserHome(groupId: groupId,),
+      if (userDoc['userType'].toLowerCase() == 'user')
+      {
+        NavigationService.navigatorKey.currentState?.push(MaterialPageRoute(
+          builder: (context) => UserHome(
+            groupId: groupId,
+          ),
         ));
       } else {
         Navigator.of(context).pushNamed(AppRoutes.home);
@@ -159,11 +165,27 @@ class _LoginFormState extends State<LoginForm> {
             ),
             const SizedBox(height: 20),
             _buildForm(context),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Don\'t Have an account?  '),
+                GestureDetector(
+                    onTap: () => widget.switchPage(1),
+                    child: Text(
+                      "Signup",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )),
+              ],
+            )
           ],
         ),
       ),
     );
   }
+
   void saveFcmTokenForUser(String userId) async {
     String? token = await FirebaseMessaging.instance.getToken();
 
@@ -174,7 +196,6 @@ class _LoginFormState extends State<LoginForm> {
       }, SetOptions(merge: true)); // Merge to avoid overwriting existing data
     }
   }
-
 
   Widget _buildForm(BuildContext context) {
     return Form(
@@ -197,9 +218,32 @@ class _LoginFormState extends State<LoginForm> {
             controller: passwordController,
             isPassword: true,
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Text(
+                  'Forgot Password?',
+                  style: TextStyle(
+                    color: AppColors.primaryColor,
+                  ),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
           Center(
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  minimumSize: Size(
+                      ResponsiveWidget.isLargeScreen(context)
+                          ? MediaQuery.of(context).size.width * 1 / 2
+                          : MediaQuery.of(context).size.width * 2 / 3,
+                      ResponsiveWidget.isLargeScreen(context) ? 50 : 40),
+                  foregroundColor: AppColors.surfaceColor,
+                  backgroundColor: AppColors.primaryColor),
               onPressed: isLoading
                   ? null
                   : () {
@@ -211,7 +255,9 @@ class _LoginFormState extends State<LoginForm> {
                       }
                     },
               child: isLoading
-                  ? const CircularProgressIndicator()
+                  ? const CircularProgressIndicator(
+                      color: AppColors.surfaceColor,
+                    )
                   : const Text('Login'),
             ),
           ),

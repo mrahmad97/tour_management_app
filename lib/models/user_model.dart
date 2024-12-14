@@ -3,7 +3,8 @@ class UserModel {
   final String? displayName;
   final String email;
   final String? userType;
-  final String phoneNumber;
+  final String? phoneNumber;
+  final String? imageURL;
 
   UserModel({
     required this.uid,
@@ -11,6 +12,7 @@ class UserModel {
     required this.email,
     required this.userType,
     required this.phoneNumber,
+    this.imageURL,
   });
 
   // Factory method to create a UserModel from Firestore data
@@ -21,14 +23,17 @@ class UserModel {
       email: data['email'] as String? ?? '',
       userType: data['userType'] as String?,
       phoneNumber: data['phoneNumber'] as String? ?? 'Unknown',
+      imageURL: data['imageURL'] as String? ?? null,
     );
   }
+
   UserModel copyWith({
     String? uid,
     String? displayName,
     String? email,
     String? userType,
     String? phoneNumber,
+    String? imageURL,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -36,12 +41,16 @@ class UserModel {
       email: email ?? this.email,
       userType: userType ?? this.userType,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      imageURL: imageURL ?? this.imageURL,
     );
   }
 
-
   @override
   String toString() {
-    return 'UserModel{uid: $uid, displayName: $displayName, email: $email, userType: $userType, phoneNumber: $phoneNumber}';
+    return 'UserModel{uid: $uid,'
+        ' displayName: $displayName,'
+        ' email: $email,'
+        ' userType: $userType,'
+        ' phoneNumber: $phoneNumber, imageURL: $imageURL}';
   }
 }

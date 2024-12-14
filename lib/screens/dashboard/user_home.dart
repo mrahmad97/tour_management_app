@@ -4,6 +4,7 @@ import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/screens/dashboard_navigation_screens/emergency_contacts/emergency_contact_screen.dart';
 import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
 
+import '../../main.dart';
 import '../dashboard_navigation_screens/chat_screen.dart';
 import '../dashboard_navigation_screens/expense_screen/Expense_screen.dart';
 import '../dashboard_navigation_screens/group_members_screen.dart';
@@ -27,62 +28,68 @@ class _UserHomeState extends State<UserHome> {
     return [
       {
         'title': 'Chat',
-        'navigateTo': () => Navigator.of(context).pushNamed(
-          AppRoutes.chat,
-          arguments: widget.groupId,
-        ),
+        'navigateTo': () =>
+            NavigationService.navigatorKey.currentState?.pushNamed(
+              AppRoutes.chat,
+              arguments: widget.groupId,
+            ),
         'icon': Icons.chat,
       },
       {
         'title': 'Live Location',
-        'navigateTo': () =>
-            Navigator.of(context).pushNamed(AppRoutes.liveLocation),
+        'navigateTo': () => NavigationService.navigatorKey.currentState
+            ?.pushNamed(AppRoutes.liveLocation),
         'icon': Icons.location_on,
       },
       {
         'title': 'Group Members',
-        'navigateTo': () => Navigator.of(context).pushNamed(
-          AppRoutes.groupMembers,
-          arguments: widget.groupId,
-        ),
+        'navigateTo': () =>
+            NavigationService.navigatorKey.currentState?.pushNamed(
+              AppRoutes.groupMembers,
+              arguments: widget.groupId,
+            ),
         'icon': Icons.group,
       },
       {
         'title': 'Route',
-        'navigateTo': () => Navigator.of(context).pushNamed(
-          AppRoutes.routeDisplay,
-          arguments: widget.groupId,
-        ),
+        'navigateTo': () =>
+            NavigationService.navigatorKey.currentState?.pushNamed(
+              AppRoutes.routeDisplay,
+              arguments: widget.groupId,
+            ),
         'icon': Icons.map,
       },
       {
         'title': 'Emergency Contact',
-        'navigateTo': () =>
-            Navigator.of(context).pushNamed(AppRoutes.emergencyContact),
+        'navigateTo': () => NavigationService.navigatorKey.currentState
+            ?.pushNamed(AppRoutes.emergencyContact),
         'icon': Icons.contact_phone,
       },
       {
         'title': 'Profile',
-        'navigateTo': () => Navigator.of(context).pushNamed(
-          AppRoutes.profile,
-          arguments: {'groupId': widget.groupId},
-        ),
+        'navigateTo': () =>
+            NavigationService.navigatorKey.currentState?.pushNamed(
+              AppRoutes.profile,
+              arguments: {'groupId': widget.groupId},
+            ),
         'icon': Icons.person,
       },
       {
         'title': 'Expense',
-        'navigateTo': () => Navigator.of(context).pushNamed(
-          AppRoutes.addExpense,
-          arguments: widget.groupId,
-        ),
+        'navigateTo': () =>
+            NavigationService.navigatorKey.currentState?.pushNamed(
+              AppRoutes.addExpense,
+              arguments: widget.groupId,
+            ),
         'icon': Icons.attach_money,
       },
       {
         'title': 'Manager Details',
-        'navigateTo': () => Navigator.of(context).pushNamed(
-          AppRoutes.managerDetails,
-          arguments: widget.groupId,
-        ),
+        'navigateTo': () =>
+            NavigationService.navigatorKey.currentState?.pushNamed(
+              AppRoutes.managerDetails,
+              arguments: widget.groupId,
+            ),
         'icon': Icons.business_center,
       },
     ];
@@ -91,11 +98,18 @@ class _UserHomeState extends State<UserHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false,),
+      appBar: AppBar(
+        title: Text(
+          'Dashboard',
+          style: TextStyle(color: AppColors.surfaceColor),
+        ),
+        backgroundColor: AppColors.primaryColor,
+        automaticallyImplyLeading: false,
+      ),
       backgroundColor: AppColors.surfaceColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
           child: ResponsiveWidget(
             largeScreen: _buildLargeScreen(context),
             mediumScreen: _buildMediumScreen(context),
@@ -115,7 +129,7 @@ class _UserHomeState extends State<UserHome> {
         Expanded(
           child: Row(
             children: [
-              _buildListItems(context),
+              Expanded(child: _buildListItems(context)),
               Expanded(
                 flex: 4,
                 child: SideScreen(
@@ -142,55 +156,53 @@ class _UserHomeState extends State<UserHome> {
   Widget _buildGridItems(BuildContext context) {
     final features = getFeatures(context);
 
-    return Expanded(
-      child: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: ResponsiveWidget.isSmallScreen(context) ? 2 : 3,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: features.length,
-        itemBuilder: (context, index) {
-          final feature = features[index];
-          return GestureDetector(
-            onTap: feature['navigateTo'],
-            child: SizedBox(
-              width: 120,
-              height: 120,
-              child: Card(
-                color: AppColors.cardBackgroundColor,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        feature['icon'],
-                        size: 40,
-                        color: AppColors.primaryColor,
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveWidget.isSmallScreen(context) ? 2 : 3,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: features.length,
+      itemBuilder: (context, index) {
+        final feature = features[index];
+        return GestureDetector(
+          onTap: feature['navigateTo'],
+          child: SizedBox(
+            width: 120,
+            height: 120,
+            child: Card(
+              color: AppColors.cardBackgroundColor,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      feature['icon'],
+                      size: 40,
+                      color: AppColors.primaryColor,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      feature['title'],
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        feature['title'],
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -211,46 +223,44 @@ class _UserHomeState extends State<UserHome> {
   Widget _buildListItems(BuildContext context) {
     final features = getFeatures(context);
 
-    return Expanded(
-      child: ListView.builder(
-        itemCount: features.length,
-        itemBuilder: (context, index) {
-          final feature = features[index];
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              color: _selectedIndex == index
-                  ? AppColors.iconColor
-                  : Colors.transparent,
-              child: Row(
-                children: [
-                  Icon(
-                    feature['icon'],
-                    size: 25,
-                    color: AppColors.primaryColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      feature['title'],
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+    return ListView.builder(
+      itemCount: features.length,
+      itemBuilder: (context, index) {
+        final feature = features[index];
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            color: _selectedIndex == index
+                ? AppColors.iconColor
+                : Colors.transparent,
+            child: Row(
+              children: [
+                Icon(
+                  feature['icon'],
+                  size: 25,
+                  color: AppColors.primaryColor,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    feature['title'],
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -260,14 +270,11 @@ class SideScreen extends StatelessWidget {
   final int selectedIndex;
   final String? groupId;
 
-
-
-  const SideScreen({
-    super.key,
-    required this.features,
-    required this.selectedIndex,
-    this.groupId
-  });
+  const SideScreen(
+      {super.key,
+      required this.features,
+      required this.selectedIndex,
+      this.groupId});
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +282,6 @@ class SideScreen extends StatelessWidget {
     final targetWidget = _buildTargetScreen(selectedIndex);
 
     return Scaffold(
-
       body: targetWidget,
     );
   }
@@ -297,10 +303,12 @@ class SideScreen extends StatelessWidget {
       case 6:
         return AddExpenseScreen(groupId: groupId);
       case 7:
-        return ProfileScreen(groupId: groupId,isManagerProfile: true,);
+        return ProfileScreen(
+          groupId: groupId,
+          isManagerProfile: true,
+        );
       default:
         return Center(child: Text('Feature not implemented'));
     }
   }
 }
-

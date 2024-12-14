@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tour_management_app/constants/colors.dart';
 import 'package:tour_management_app/functions/push_notification_service.dart';
+import 'package:tour_management_app/main.dart';
 import 'package:tour_management_app/screens/dashboard/user_home.dart';
 import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
 import '../../constants/routes.dart';
@@ -32,6 +34,7 @@ class _HomePageState extends State<HomePage> {
     // Use listen: true to rebuild when the user changes
 
     return Scaffold(
+      backgroundColor: AppColors.surfaceColor,
       body: SingleChildScrollView(
         child: SafeArea(
           child: ResponsiveWidget(
@@ -60,8 +63,12 @@ class _HomePageState extends State<HomePage> {
             Column(
               children: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: AppColors.surfaceColor),
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
+                    NavigationService.navigatorKey.currentState
+                        ?.push(MaterialPageRoute(
                       builder: (context) => CreateGroupScreen(),
                     ));
                   },
@@ -73,9 +80,13 @@ class _HomePageState extends State<HomePage> {
                       : Text('No user signed in'),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: AppColors.surfaceColor),
                   onPressed: () async {
                     await handleSignOut(context);
-                    Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+                    NavigationService.navigatorKey.currentState
+                        ?.pushNamed(AppRoutes.loginSignup);
                   },
                   child: Text('Sign out'),
                 ),
@@ -104,8 +115,12 @@ class _HomePageState extends State<HomePage> {
             Column(
               children: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: AppColors.surfaceColor),
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
+                    NavigationService.navigatorKey.currentState
+                        ?.push(MaterialPageRoute(
                       builder: (context) => CreateGroupScreen(),
                     ));
                   },
@@ -117,9 +132,13 @@ class _HomePageState extends State<HomePage> {
                       : Text('No user signed in'),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: AppColors.surfaceColor),
                   onPressed: () async {
                     await handleSignOut(context);
-                    Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+                    NavigationService.navigatorKey.currentState
+                        ?.pushNamed(AppRoutes.loginSignup);
                   },
                   child: Text('Sign out'),
                 ),
@@ -141,8 +160,11 @@ class _HomePageState extends State<HomePage> {
         _buildTitle(context),
         _buildGroupTiles(context),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: AppColors.surfaceColor),
           onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
+            NavigationService.navigatorKey.currentState?.push(MaterialPageRoute(
               builder: (context) => CreateGroupScreen(),
             ));
           },
@@ -154,9 +176,13 @@ class _HomePageState extends State<HomePage> {
               : Text('No user signed in'),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: AppColors.surfaceColor),
           onPressed: () async {
             await handleSignOut(context);
-            Navigator.of(context).pushNamed(AppRoutes.loginSignup);
+            NavigationService.navigatorKey.currentState
+                ?.pushNamed(AppRoutes.loginSignup);
           },
           child: Text('Sign out'),
         ),
@@ -200,7 +226,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   onTap: () {
                     // Navigate to the UserDashboardScreen with the group.id
-                    Navigator.of(context).push(MaterialPageRoute(
+                    NavigationService.navigatorKey.currentState
+                        ?.push(MaterialPageRoute(
                       builder: (context) => UserHome(
                         groupId: group.id,
                       ),
@@ -319,7 +346,7 @@ class _HomePageState extends State<HomePage> {
                       return userDoc[
                           'fcmToken']; // Get the FCM token for each user
                     }));
-                    await sendMemberNotificationToUsers(tokens);
+                    await sendMemberNotificationToUsers(tokens, group.id);
                     Navigator.pop(context); // Close the dialog
                   },
                   child: const Text('Add Members'),
@@ -353,7 +380,8 @@ class _HomePageState extends State<HomePage> {
     return Text(
       'Manager Dashboard',
       style: TextStyle(
-          fontSize: ResponsiveWidget.isSmallScreen(context) ? 16 : 20,fontWeight: FontWeight.bold),
+          fontSize: ResponsiveWidget.isSmallScreen(context) ? 16 : 20,
+          fontWeight: FontWeight.bold),
     );
   }
 }

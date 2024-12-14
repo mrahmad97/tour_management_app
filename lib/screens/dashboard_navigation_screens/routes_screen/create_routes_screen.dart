@@ -229,7 +229,7 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
 
       // Send FCM notifications to the users (excluding the manager)
       if (tokens.isNotEmpty) {
-        await sendNotificationToUsers(tokens);
+        await sendNotificationToUsers(tokens, groupId);
       }
     } catch (e) {
       print('Error sending group update notification: $e');

@@ -161,6 +161,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           const SizedBox(height: 20),
           Center(
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: AppColors.surfaceColor),
               onPressed: _showUserSelectionDialog, // Show the modal dialog
               child: const Text('Add Members'),
             ),
@@ -168,6 +171,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           const SizedBox(height: 20),
           Center(
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: AppColors.surfaceColor),
               onPressed: isLoading
                   ? null
                   : () async {

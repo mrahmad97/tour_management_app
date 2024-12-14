@@ -27,7 +27,7 @@ class _RouteDisplayScreenState extends State<RouteDisplayScreen> {
         automaticallyImplyLeading: false,
 
       ),
-      body: groupId == null || user == null ? Center(child: Text('An Error occured'),):Column(
+      body: groupId == null  ? Center(child: Text('An Error occured'),):Column(
         children: [
           // Add Routes Button (only for managers)
           user.userType == 'manager' ?
