@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tour_management_app/constants/colors.dart';
 import 'package:tour_management_app/providers/user_provider.dart';
 import 'package:tour_management_app/screens/dashboard_navigation_screens/routes_screen/create_routes_screen.dart';
+import 'package:intl/intl.dart';
 
 import '../../../models/group_route.dart';
 
@@ -23,81 +25,105 @@ class _RouteDisplayScreenState extends State<RouteDisplayScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Route Display Screen'),
+        title: const Text(
+          'Routes',
+          style: TextStyle(color: AppColors.surfaceColor),
+        ),
         automaticallyImplyLeading: false,
-
+        backgroundColor: AppColors.primaryColor,
       ),
-      body: groupId == null  ? Center(child: Text('An Error occured'),):Column(
-        children: [
-          // Add Routes Button (only for managers)
-          user.userType == 'manager' ?
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => AddRouteScreen(groupId: groupId),
-                ));
-              },
-              child: const Text('Add Routes'),
-            ) : SizedBox() ,
+      backgroundColor: AppColors.surfaceColor,
+      body: groupId == null
+          ? Center(
+              child: Text('An Error occured'),
+            )
+          : Column(
+              children: [
+                // Add Routes Button (only for managers)
+                user.userType == 'manager'
+                    ? Column(
+                      children: [
+                        SizedBox(height: 10,),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                foregroundColor: AppColors.surfaceColor,
+                                backgroundColor: AppColors.primaryColor),
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    AddRouteScreen(groupId: groupId),
+                              ));
+                            },
+                            child: const Text('Add Routes'),
+                          ),
+                      ],
+                    )
+                    : SizedBox(),
 
-          const SizedBox(height: 10),
+                SizedBox(height: 10),
 
-          // Display Routes List
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('routes')
-                  .where('groupId', isEqualTo: groupId)
-                  .orderBy('orderIndex')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                // Display Routes List
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('routes')
+                        .where('groupId', isEqualTo: groupId)
+                        .orderBy('orderIndex')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                if (snapshot.hasError) {
-                  print('Error: ${snapshot.error}'); // Print the error to the console
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+                      if (snapshot.hasError) {
+                        print(
+                            'Error: ${snapshot.error}'); // Print the error to the console
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No routes found.'));
-                }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Center(child: Text('No routes found.'));
+                      }
 
-                // Convert documents to RouteModel
-                final routes = snapshot.data!.docs.map((doc) {
-                  return RouteModel.fromMap(doc.id, doc.data() as Map<String, dynamic>);
-                }).toList();
+                      // Convert documents to RouteModel
+                      final routes = snapshot.data!.docs.map((doc) {
+                        return RouteModel.fromMap(
+                            doc.id, doc.data() as Map<String, dynamic>);
+                      }).toList();
 
-                return ListView.builder(
-                  itemCount: routes.length,
-                  itemBuilder: (context, index) {
-                    final route = routes[index];
-                    return _buildRouteTile(route);
-                  },
-                );
-              },
+                      return ListView.builder(
+                        itemCount: routes.length,
+                        itemBuilder: (context, index) {
+                          final route = routes[index];
+                          return _buildRouteTile(route);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
   // Route tile widget
   Widget _buildRouteTile(RouteModel route) {
     return Card(
+      color: AppColors.cardBackgroundColor,
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: ListTile(
-        title: Text(route.heading, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(route.heading,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Name: ${route.name}'),
             Text('Type: ${route.typeOfStop}'),
-            Text('Time: ${route.time.toLocal()}'),
-            Text('Location: ${route.location}'),
-            Text('Duration: ${route.totalTime}'),
+            Text('Starting Time: ${DateFormat('HH:mm').format(route.startingTime)}'),
+            Text('Starting Date: ${DateFormat('dd:MM:yy').format(route.startingTime)}'),
+            Text('Starting Location: ${route.startingFrom}'),
+            Text('Ending Location: ${route.endingAt}'),
+            Text('Ending Time: ${DateFormat('HH:mm').format(route.endingTime)}'),
+            Text('Ending Date: ${DateFormat('dd:MM:yy').format(route.endingTime)}'),
           ],
         ),
         trailing: IconButton(
@@ -116,24 +142,29 @@ class _RouteDisplayScreenState extends State<RouteDisplayScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: AppColors.surfaceColor,
           title: Text(route.heading),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Name: ${route.name}'),
-              Text('Type of Stop: ${route.typeOfStop}'),
-              Text('Time: ${route.time.toLocal()}'),
-              Text('Total Time: ${route.totalTime}'),
-              Text('Location: ${route.location}'),
+              Text('Type: ${route.typeOfStop}'),
+              Text('Starting Time: ${DateFormat('HH:mm').format(route.startingTime)}'),
+              Text('Starting Date: ${DateFormat('dd:MM:yy').format(route.startingTime)}'),
+              Text('Starting Location: ${route.startingFrom}'),
+              Text('Ending Location: ${route.endingAt}'),
+              Text('Ending Time: ${DateFormat('HH:mm').format(route.endingTime)}'),
+              Text('Ending Date: ${DateFormat('dd:MM:yy').format(route.endingTime)}'),
               Text('Description: ${route.description}'),
-              Text('Purpose: ${route.purpose}'),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+              child: const Text(
+                'Close',
+                style: TextStyle(color: AppColors.primaryColor),
+              ),
             ),
           ],
         );

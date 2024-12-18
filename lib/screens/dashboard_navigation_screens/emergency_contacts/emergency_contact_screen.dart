@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tour_management_app/providers/user_provider.dart';
 
+import '../../../constants/colors.dart';
 import '../../../models/emergency_contact_model.dart';
 import 'add_emergency_contacts.dart';
 
@@ -15,17 +16,26 @@ class EmergencyContactsScreen extends StatefulWidget {
 class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context).user!; // Get current user ID
+    final user =
+        Provider.of<UserProvider>(context).user!; // Get current user ID
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Emergency Contacts'),
+        title: Text(
+          'Emergency Contacts',
+          style: TextStyle(color: AppColors.surfaceColor),
+        ),
         automaticallyImplyLeading: false,
-
+        backgroundColor: AppColors.primaryColor,
       ),
+      backgroundColor: AppColors.surfaceColor,
       body: Column(
         children: [
+          SizedBox(height: 10,),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                foregroundColor: AppColors.surfaceColor,
+                backgroundColor: AppColors.primaryColor),
             onPressed: () {
               Navigator.push(
                 context,
@@ -38,6 +48,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             },
             child: Text('Add Emergency Contact'),
           ),
+          SizedBox(height: 10,),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -58,7 +69,8 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 }
 
                 final contacts = snapshot.data!.docs.map((doc) {
-                  return EmergencyContact.fromMap(doc.id, doc.data() as Map<String, dynamic>);
+                  return EmergencyContact.fromMap(
+                      doc.id, doc.data() as Map<String, dynamic>);
                 }).toList();
 
                 return ListView.builder(
@@ -68,6 +80,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                     return Card(
                       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       child: ListTile(
+                        tileColor: AppColors.cardBackgroundColor,
                         title: Text(contact.name),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

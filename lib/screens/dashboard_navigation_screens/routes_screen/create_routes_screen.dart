@@ -20,13 +20,13 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
 
   // Controllers for each field
   final TextEditingController _headingController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _typeOfStopController = TextEditingController();
-  final TextEditingController _totalTimeController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _startingFromController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _purposeController = TextEditingController();
-  DateTime? _selectedTime;
+  final TextEditingController _endingAtController = TextEditingController();
+  DateTime? _selectedStartingTime;
+  DateTime? _selectedEndingTime;
+
 
   bool _isSubmitting = false;
 
@@ -34,17 +34,15 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
   void dispose() {
     // Dispose controllers to free resources
     _headingController.dispose();
-    _nameController.dispose();
     _typeOfStopController.dispose();
-    _totalTimeController.dispose();
-    _locationController.dispose();
+    _startingFromController.dispose();
     _descriptionController.dispose();
-    _purposeController.dispose();
+    _endingAtController.dispose();
     super.dispose();
   }
 
   // Function to pick a time
-  Future<void> _pickTime() async {
+  Future<void> _pickStartingTime() async {
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -53,7 +51,27 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
     if (pickedTime != null) {
       final now = DateTime.now();
       setState(() {
-        _selectedTime = DateTime(
+        _selectedStartingTime = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+      });
+    }
+  }
+  // Function to pick ending time
+  Future<void> _pickEndingTime() async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime != null) {
+      final now = DateTime.now();
+      setState(() {
+        _selectedEndingTime = DateTime(
           now.year,
           now.month,
           now.day,
@@ -64,11 +82,12 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
     }
   }
 
+
   // Function to submit the route data
   Future<void> _submitRoute() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedTime == null) {
+    if (_selectedStartingTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a time for the stop')),
       );
@@ -95,13 +114,12 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
       final newRoute = RouteModel(
         groupId: widget.groupId ?? '',
         heading: _headingController.text,
-        name: _nameController.text,
         typeOfStop: _typeOfStopController.text,
-        time: _selectedTime!,
-        totalTime: _totalTimeController.text,
-        location: _locationController.text,
+        startingTime: _selectedStartingTime!,
+        endingTime: _selectedEndingTime!,
+        startingFrom: _startingFromController.text,
         description: _descriptionController.text,
-        purpose: _purposeController.text,
+        endingAt: _endingAtController.text,
         createdAt: DateTime.now(),
         createdBy: createdBy,
         orderIndex: currentOrderIndex,
@@ -115,7 +133,7 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
 
       // Clear the form after submission
       _formKey.currentState!.reset();
-      _selectedTime = null;
+      _selectedStartingTime = null;
       Navigator.of(context).pop();
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -146,31 +164,18 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(_headingController, 'Heading', 'Enter heading'),
-              _buildTextField(_nameController, 'Name', 'Enter name'),
               _buildTextField(_typeOfStopController, 'Type of Stop', 'Enter type of stop'),
-              _buildTextField(_totalTimeController, 'Total Time', 'Enter total time spent'),
-              _buildTextField(_locationController, 'Location', 'Enter location'),
+              _buildTextField(_startingFromController, 'Starting From', 'Enter starting point'),
+              _buildTextField(_endingAtController, 'Ending At', 'Enter ending point'),
               _buildTextField(_descriptionController, 'Description', 'Enter description'),
-              _buildTextField(_purposeController, 'Purpose', 'Enter purpose'),
+
 
               const SizedBox(height: 16),
-              // Time picker field
-              Row(
-                children: [
-                  Text(
-                    _selectedTime == null
-                        ? 'No time selected'
-                        : 'Time: ${_selectedTime!.hour}:${_selectedTime!.minute}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: _pickTime,
-                    child: const Text('Pick Time'),
-                  ),
-                ],
-              ),
-
+              // Ending Time Picker
+              _buildTimePickerRow('Starting Time', _selectedStartingTime, _pickStartingTime),
+              const SizedBox(height: 16),
+              // Ending Time Picker
+              _buildTimePickerRow('Ending Time', _selectedEndingTime, _pickEndingTime),
               const SizedBox(height: 24),
               // Submit button
               Center(
@@ -234,6 +239,25 @@ class _AddRouteScreenState extends State<AddRouteScreen> {
     } catch (e) {
       print('Error sending group update notification: $e');
     }
+  }
+  // Helper method to build time picker rows
+  Widget _buildTimePickerRow(String label, DateTime? selectedTime, VoidCallback pickTime) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            selectedTime == null
+                ? '$label: No time selected'
+                : '$label: ${selectedTime.hour}:${selectedTime.minute.toString().padLeft(2, '0')}',
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: pickTime,
+          child: Text('Pick $label'),
+        ),
+      ],
+    );
   }
 
 //   Future<void> sendNotificationToUsers(List<dynamic> tokens) async {

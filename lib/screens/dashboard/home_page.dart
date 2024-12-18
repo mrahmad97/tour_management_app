@@ -26,21 +26,17 @@ class _HomePageState extends State<HomePage> {
     await Provider.of<UserProvider>(context, listen: false).signOut();
   }
 
-  // List to track reselected users
-  List<String> reselectedUserIds = [];
-
   @override
   Widget build(BuildContext context) {
-    // Use listen: true to rebuild when the user changes
-
     return Scaffold(
       backgroundColor: AppColors.surfaceColor,
       body: SingleChildScrollView(
         child: SafeArea(
           child: ResponsiveWidget(
-              largeScreen: _buildLargeScreen(context),
-              mediumScreen: _buildMediumScreen(context),
-              smallScreen: _buildSmallScreen(context)),
+            largeScreen: _buildLargeScreen(context),
+            mediumScreen: _buildMediumScreen(context),
+            smallScreen: _buildSmallScreen(context),
+          ),
         ),
       ),
     );
@@ -55,40 +51,43 @@ class _HomePageState extends State<HomePage> {
       children: [
         _buildTitle(context),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             SizedBox(
-                width: MediaQuery.of(context).size.width * 1 / 2,
-                height: MediaQuery.of(context).size.height,
-                child: _buildGroupTiles(context)),
+              width: MediaQuery.of(context).size.width * 0.5,
+              height: MediaQuery.of(context).size.height,
+              child: _buildGroupTiles(context),
+            ),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.surfaceColor),
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: AppColors.surfaceColor,
+                  ),
                   onPressed: () {
-                    NavigationService.navigatorKey.currentState
-                        ?.push(MaterialPageRoute(
-                      builder: (context) => CreateGroupScreen(),
-                    ));
+                    NavigationService.navigatorKey.currentState?.push(
+                      MaterialPageRoute(builder: (context) => CreateGroupScreen()),
+                    );
                   },
-                  child: Text('Create Group'),
+                  child: const Text('Create Group'),
                 ),
                 Center(
                   child: userProvider.user != null
                       ? Text('Welcome, ${userProvider.user!.displayName}')
-                      : Text('No user signed in'),
+                      : const Text('No user signed in'),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.surfaceColor),
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: AppColors.surfaceColor,
+                  ),
                   onPressed: () async {
                     await handleSignOut(context);
-                    NavigationService.navigatorKey.currentState
-                        ?.pushNamed(AppRoutes.loginSignup);
+                    NavigationService.navigatorKey.currentState?.pushNamed(AppRoutes.loginSignup);
                   },
-                  child: Text('Sign out'),
+                  child: const Text('Sign out'),
                 ),
               ],
             ),
@@ -99,100 +98,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildMediumScreen(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _buildTitle(context),
-        Row(
-          children: [
-            SizedBox(
-                width: MediaQuery.of(context).size.width * 1 / 2,
-                height: MediaQuery.of(context).size.height,
-                child: _buildGroupTiles(context)),
-            Column(
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.surfaceColor),
-                  onPressed: () {
-                    NavigationService.navigatorKey.currentState
-                        ?.push(MaterialPageRoute(
-                      builder: (context) => CreateGroupScreen(),
-                    ));
-                  },
-                  child: Text('Create Group'),
-                ),
-                Center(
-                  child: userProvider.user != null
-                      ? Text('Welcome, ${userProvider.user!.displayName}')
-                      : Text('No user signed in'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.surfaceColor),
-                  onPressed: () async {
-                    await handleSignOut(context);
-                    NavigationService.navigatorKey.currentState
-                        ?.pushNamed(AppRoutes.loginSignup);
-                  },
-                  child: Text('Sign out'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
+    return _buildLargeScreen(context);
   }
 
   Widget _buildSmallScreen(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _buildTitle(context),
-        _buildGroupTiles(context),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: AppColors.surfaceColor),
-          onPressed: () {
-            NavigationService.navigatorKey.currentState?.push(MaterialPageRoute(
-              builder: (context) => CreateGroupScreen(),
-            ));
-          },
-          child: Text('Create Group'),
-        ),
-        Center(
-          child: userProvider.user != null
-              ? Text('Welcome, ${userProvider.user!.displayName}')
-              : Text('No user signed in'),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: AppColors.surfaceColor),
-          onPressed: () async {
-            await handleSignOut(context);
-            NavigationService.navigatorKey.currentState
-                ?.pushNamed(AppRoutes.loginSignup);
-          },
-          child: Text('Sign out'),
-        ),
-      ],
-    );
+    return _buildLargeScreen(context);
   }
 
   Widget _buildGroupTiles(BuildContext context) {
     return FutureBuilder<List<Group>>(
-      future: fetchGroupsCreatedByUser(context), // Fetch the groups
+      future: fetchGroupsCreatedByUser(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -203,40 +118,27 @@ class _HomePageState extends State<HomePage> {
         } else {
           final groups = snapshot.data!;
 
-          return SizedBox(
-            height: 400,
-            child: ListView.builder(
-              itemCount: groups.length,
-              itemBuilder: (context, index) {
-                final group = groups[index];
+          return ListView.builder(
+            itemCount: groups.length,
+            itemBuilder: (context, index) {
+              final group = groups[index];
 
-                return ListTile(
-                  title: Text(group.name),
-                  subtitle: Text(group.description),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.group_add),
-                        onPressed: () {
-                          _showUserSelectionDialog(context, group);
-                        },
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    // Navigate to the UserDashboardScreen with the group.id
-                    NavigationService.navigatorKey.currentState
-                        ?.push(MaterialPageRoute(
-                      builder: (context) => UserHome(
-                        groupId: group.id,
-                      ),
-                    ));
-                    // getToken();
+              return ListTile(
+                title: Text(group.name),
+                subtitle: Text(group.description),
+                trailing: IconButton(
+                  icon: const Icon(Icons.group_add),
+                  onPressed: () {
+                    _showUserSelectionDialog(context, group);
                   },
-                );
-              },
-            ),
+                ),
+                onTap: () {
+                  NavigationService.navigatorKey.currentState?.push(
+                    MaterialPageRoute(builder: (context) => UserHome(groupId: group.id)),
+                  );
+                },
+              );
+            },
           );
         }
       },
@@ -244,18 +146,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showUserSelectionDialog(BuildContext context, Group group) async {
-    final currentUserId =
-        Provider.of<UserProvider>(context, listen: false).user?.uid;
+    final currentUserId = Provider.of<UserProvider>(context, listen: false).user?.uid;
 
-    // Fetch the latest group data from Firestore
     DocumentSnapshot groupSnapshot = await FirebaseFirestore.instance
         .collection('groups')
         .doc(group.id)
         .get();
-    List<String> groupMembers =
-        List<String>.from(groupSnapshot['members'] ?? []);
+    List<String> groupMembers = List<String>.from(groupSnapshot['members'] ?? []);
 
-    // Initialize the selectedUserIds with the latest members
     List<String> selectedUserIds = List<String>.from(groupMembers);
 
     showDialog(
@@ -268,16 +166,15 @@ class _HomePageState extends State<HomePage> {
               title: const Text('Select Members'),
               content: SizedBox(
                 width: double.maxFinite,
-                height: 400.0, // Fixed height for the dialog
+                height: 400.0,
                 child: FutureBuilder<List<UserModel>>(
-                  future: fetchAllUsers(), // Fetch all users
+                  future: fetchAllUsers(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
-                    } else if (snapshot.data == null ||
-                        snapshot.data!.isEmpty) {
+                    } else if (snapshot.data == null || snapshot.data!.isEmpty) {
                       return const Center(child: Text('No users found.'));
                     }
 
@@ -287,35 +184,36 @@ class _HomePageState extends State<HomePage> {
                       itemCount: users.length,
                       itemBuilder: (context, index) {
                         final user = users[index];
-                        final isSelected = selectedUserIds.contains(user.uid);
+                        final isCurrentMember = selectedUserIds.contains(user.uid);
 
                         return ListTile(
-                          title: Text(
-                            user.uid == currentUserId
-                                ? 'You'
-                                : (user.displayName ?? 'Unknown'),
-                          ),
+                          title: Text(user.uid == currentUserId ? 'You' : (user.displayName ?? 'Unknown')),
                           subtitle: Text(user.email),
-                          trailing: isSelected
-                              ? const Icon(Icons.check,
-                                  color: Colors.green) // Tick icon if selected
+                          trailing: isCurrentMember
+                              ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.check, color: Colors.green),
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                                onPressed: () {
+                                  setDialogState(() {
+                                    selectedUserIds.remove(user.uid);
+                                  });
+                                },
+                              ),
+                            ],
+                          )
                               : IconButton(
-                                  icon: const Icon(Icons.add),
-                                  onPressed: () {
-                                    setDialogState(() {
-                                      if (isSelected) {
-                                        selectedUserIds.remove(user.uid);
-                                        reselectedUserIds.remove(user.uid);
-                                      } else {
-                                        selectedUserIds.add(user.uid);
-                                        if (!reselectedUserIds
-                                            .contains(user.uid)) {
-                                          reselectedUserIds.add(user.uid);
-                                        }
-                                      }
-                                    });
-                                  },
-                                ),
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
+                              setDialogState(() {
+                                if (!selectedUserIds.contains(user.uid)) {
+                                  selectedUserIds.add(user.uid);
+                                }
+                              });
+                            },
+                          ),
                         );
                       },
                     );
@@ -325,31 +223,16 @@ class _HomePageState extends State<HomePage> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context); // Close the dialog
+                    Navigator.pop(context);
                   },
                   child: const Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () async {
-                    if (selectedUserIds.isNotEmpty ||
-                        reselectedUserIds.isNotEmpty) {
-                      selectedUserIds.addAll(reselectedUserIds);
-                      _addMembersToGroup(
-                          group.id, selectedUserIds.toSet().toList());
-                    }
-                    final tokens =
-                        await Future.wait(groupMembers.map((userId) async {
-                      final userDoc = await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(userId)
-                          .get();
-                      return userDoc[
-                          'fcmToken']; // Get the FCM token for each user
-                    }));
-                    await sendMemberNotificationToUsers(tokens, group.id);
-                    Navigator.pop(context); // Close the dialog
+                    await _addMembersToGroup(group.id, selectedUserIds);
+                    Navigator.pop(context);
                   },
-                  child: const Text('Add Members'),
+                  child: const Text('Update Members'),
                 ),
               ],
             );
@@ -359,20 +242,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _addMembersToGroup(
-      String groupId, List<String> selectedUserIds) async {
+  Future<void> _addMembersToGroup(String groupId, List<String> selectedUserIds) async {
     try {
-      // Update the group document with the new members
-      await FirebaseFirestore.instance
-          .collection('groups')
-          .doc(groupId)
-          .update({
+      await FirebaseFirestore.instance.collection('groups').doc(groupId).update({
         'members': selectedUserIds,
       });
-
-      print('Members added to group successfully!');
+      print('Members updated successfully!');
     } catch (e) {
-      print('Error adding members: $e');
+      print('Error updating members: $e');
     }
   }
 
@@ -380,8 +257,9 @@ class _HomePageState extends State<HomePage> {
     return Text(
       'Manager Dashboard',
       style: TextStyle(
-          fontSize: ResponsiveWidget.isSmallScreen(context) ? 16 : 20,
-          fontWeight: FontWeight.bold),
+        fontSize: ResponsiveWidget.isSmallScreen(context) ? 16 : 20,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }

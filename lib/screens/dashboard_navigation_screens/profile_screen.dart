@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tour_management_app/constants/colors.dart';
 
+import '../../constants/routes.dart';
+import '../../main.dart';
 import '../../models/user_model.dart';
 import '../../providers/user_provider.dart';
 
@@ -68,6 +71,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> handleSignOut(BuildContext context) async {
+    await Provider.of<UserProvider>(context, listen: false).signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = Provider.of<UserProvider>(context).user;
@@ -84,38 +91,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        backgroundColor: AppColors.primaryColor,
+        title: Text(
+          widget.isManagerProfile ? 'Manager Profile' : 'Profile',
+          style: TextStyle(color: AppColors.surfaceColor),
+        ),
         automaticallyImplyLeading: false,
       ),
+      backgroundColor: AppColors.surfaceColor,
       body: userProfile == null
           ? const Center(child: Text('User not found.'))
           : Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: null, // Add photo URL handling here
-                    child: const Icon(Icons.person, size: 50),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    userProfile.displayName ?? 'No Name',
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Email: ${userProfile.email}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Phone: ${userProfile.phoneNumber}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: AppColors.surfaceColor,
+                      radius: 50,
+                      backgroundImage: userProfile.imageURL != null &&
+                              userProfile.imageURL!.isNotEmpty
+                          ? NetworkImage(userProfile.imageURL!)
+                          : const AssetImage('assets/get_started/mountains.png')
+                              as ImageProvider, // Add photo URL handling here
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      userProfile.displayName != null
+                          ? userProfile.displayName![0].toUpperCase() +
+                              userProfile.displayName!.substring(1)
+                          : 'Unknown',
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Email: ${userProfile.email}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Phone: ${userProfile.phoneNumber}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Account Type: ${userProfile.userType != null ? userProfile.userType![0].toUpperCase() + userProfile.userType!.substring(1) : "N/A"}',
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          foregroundColor: AppColors.surfaceColor),
+                      onPressed: () async {
+                        await handleSignOut(context);
+                        NavigationService.navigatorKey.currentState
+                            ?.pushNamed(AppRoutes.loginSignup);
+                      },
+                      child: Text('Sign out'),
+                    ),
+                  ],
+                ),
               ),
             ),
     );

@@ -6,13 +6,15 @@ class Expense {
   final String description; // Description of the expense
   final DateTime createdAt; // Timestamp of when the expense was added
   final String groupId; // The group ID the expense belongs to
+  final String? userName;
 
   Expense({
     required this.userId,
     required this.amount,
     required this.description,
     required this.createdAt,
-    required this.groupId, // Add groupId to the constructor
+    required this.groupId,
+    required this.userName,
   });
 
   // Convert Expense to Map for Firestore
@@ -22,18 +24,20 @@ class Expense {
       'amount': amount,
       'description': description,
       'createdAt': Timestamp.fromDate(createdAt),
-      'groupId': groupId, // Add groupId to the map
+      'groupId': groupId,
+      'userName': userName,
     };
   }
 
   // Convert Firestore Document to Expense Model
   factory Expense.fromMap(Map<String, dynamic> data) {
     return Expense(
-      userId: data['userId'],
-      amount: data['amount'],
-      description: data['description'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      groupId: data['groupId'], // Parse groupId from data
+      userId: data['userId'] ?? '', // Fallback to an empty string if null
+      amount: (data['amount'] as num?)?.toDouble() ?? 0.0, // Convert to double and fallback to 0.0
+      description: data['description'] ?? 'No description', // Default description
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(), // Fallback to current time
+      groupId: data['groupId'] ?? '', // Fallback to an empty string if null
+      userName: data['userName'] ??  'unknown',
     );
   }
 }

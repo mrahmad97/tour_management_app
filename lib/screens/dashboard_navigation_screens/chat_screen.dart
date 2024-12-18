@@ -23,7 +23,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final FocusNode _messageFocusNode = FocusNode(); // FocusNode for the text field
+  final FocusNode _messageFocusNode =
+      FocusNode(); // FocusNode for the text field
   late final UserProvider userProvider;
   final MediaUploadDownload mediaHandler = MediaUploadDownload();
   dynamic _pickedImage; // Store the picked image
@@ -59,7 +60,6 @@ class _ChatScreenState extends State<ChatScreen> {
         print("Image uploaded successfully. URL: $imageUrl");
       }
 
-
       // Send the message to Firebase Firestore with the image URL (if available)
       // Create the message using the ChatModel
       final chatMessage = ChatModel(
@@ -72,6 +72,11 @@ class _ChatScreenState extends State<ChatScreen> {
         isSent: true,
         isDelivered: false,
       );
+      _messageController.clear();
+      setState(() {
+        _pickedImage = null; // Clear picked image after sending
+        _imageName = ''; // Reset image name
+      });
 
       await FirebaseFirestore.instance
           .collection('chats')
@@ -79,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .collection('messages')
           .add(chatMessage.toMap());
 
-      // Fetch the group members (excluding the manager)
+      // Fetch the group document
       final groupSnapshot = await FirebaseFirestore.instance
           .collection('groups')
           .doc(widget.groupId)
@@ -87,22 +92,25 @@ class _ChatScreenState extends State<ChatScreen> {
 
       final groupMembers = List<String>.from(groupSnapshot['members']);
 
+// Get the sender's user ID
+      final senderId = userProvider.user?.uid;
 
+// Exclude the sender from the group members list
+      groupMembers.removeWhere((userId) => userId == senderId);
 
-
-      // Fetch FCM tokens of the group members (excluding the manager)
+// Fetch FCM tokens of the remaining group members
       final tokens = await Future.wait(groupMembers.map((userId) async {
-        final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .get();
         return userDoc['fcmToken']; // Get the FCM token for each user
       }));
 
-      await sendChatNotificationToUsers(tokens,userProvider.user?.displayName,messageText, widget.groupId);
+// Send the notification
+      await sendChatNotificationToUsers(
+          tokens, userProvider.user?.displayName, messageText, widget.groupId);
 
-      _messageController.clear();
-      setState(() {
-        _pickedImage = null; // Clear picked image after sending
-        _imageName = ''; // Reset image name
-      });
     }
   }
 
@@ -223,6 +231,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -234,11 +243,13 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus(); // Dismiss keyboard when tapping outside
+        FocusScope.of(context)
+            .unfocus(); // Dismiss keyboard when tapping outside
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Chat', style: TextStyle(color: AppColors.surfaceColor)),
+          title: const Text('Chat',
+              style: TextStyle(color: AppColors.surfaceColor)),
           backgroundColor: AppColors.primaryColor,
         ),
         backgroundColor: AppColors.surfaceColor,
@@ -262,7 +273,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   }
 
                   final messages = snapshot.data!.docs.map((doc) {
-                    return ChatModel.fromMap(doc.data() as Map<String, dynamic>);
+                    return ChatModel.fromMap(
+                        doc.data() as Map<String, dynamic>);
                   }).toList();
 
                   return ListView.builder(
@@ -283,5 +295,4 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-
 }

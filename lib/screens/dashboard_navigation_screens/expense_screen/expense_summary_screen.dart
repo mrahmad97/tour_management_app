@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
+import 'package:tour_management_app/constants/colors.dart';
 import '../../../models/expense_model.dart';
 
 class ExpenseSummaryScreen extends StatefulWidget {
   final String? groupId;
 
-  const ExpenseSummaryScreen({Key? key,this.groupId}) : super(key: key);
+  const ExpenseSummaryScreen({Key? key, this.groupId}) : super(key: key);
 
   @override
   _ExpenseSummaryScreenState createState() => _ExpenseSummaryScreenState();
@@ -25,20 +26,13 @@ class _ExpenseSummaryScreenState extends State<ExpenseSummaryScreen> {
           .where('groupId', isEqualTo: widget.groupId)
           .get();
 
-      // Print the number of expenses fetched
-      print('Number of expenses: ${expensesSnapshot.docs.length}');
-
       // Calculate total amount of expenses
       totalAmount = expensesSnapshot.docs.fold(0.0, (sum, doc) {
         final expense = Expense.fromMap(doc.data());
-        print('Fetched expense: ${expense.amount}'); // Print each expense's amount
         return sum + expense.amount;
       });
 
-      // Print total amount after calculation
-      print('Total expenses calculated: $totalAmount');
-
-      // Get the number of members in the group (you would fetch this from the group's data)
+      // Get the number of members in the group
       final groupSnapshot = await FirebaseFirestore.instance
           .collection('groups')
           .doc(widget.groupId)
@@ -48,15 +42,11 @@ class _ExpenseSummaryScreenState extends State<ExpenseSummaryScreen> {
         numberOfMembers = groupSnapshot.data()?['members'].length ?? 0;
       }
 
-      // Print number of members in the group
-      print('Number of members in the group: $numberOfMembers');
-
       setState(() {});
     } catch (e) {
       print('Error: $e');
     }
   }
-
 
   @override
   void initState() {
@@ -66,23 +56,37 @@ class _ExpenseSummaryScreenState extends State<ExpenseSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final amountPerMember = totalAmount / numberOfMembers;
+    final amountPerMember =
+        numberOfMembers > 0 ? totalAmount / numberOfMembers : 0.0;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Expense Summary'),
+        backgroundColor: AppColors.primaryColor,
+        title: Text(
+          'Expense Summary',
+          style: TextStyle(color: AppColors.surfaceColor),
+        ),
       ),
+      backgroundColor: AppColors.surfaceColor,
       body: Column(
         children: [
-          Text('Total Expenses: \$${totalAmount.toStringAsFixed(2)}'),
-          Text('Number of Members: $numberOfMembers'),
-          Text('Amount per Member: \$${amountPerMember.toStringAsFixed(2)}'),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Total Expenses: \$${totalAmount.toStringAsFixed(2)}'),
+                Text('Number of Members: $numberOfMembers'),
+                Text(
+                    'Amount per Member: \$${amountPerMember.toStringAsFixed(2)}'),
+              ],
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('groups')
-                  .doc(widget.groupId)
-                  .collection('members') // Assuming the group has a collection of members
+                  .collection('expenses')
+                  .where('groupId', isEqualTo: widget.groupId)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -94,18 +98,24 @@ class _ExpenseSummaryScreenState extends State<ExpenseSummaryScreen> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('No members found.'));
+                  return Center(child: Text('No expenses found.'));
                 }
 
-                // List members and how much they owe
+                // Display list of expenses
                 return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    final member = snapshot.data!.docs[index];
-                    final memberName = member['name'];
+                    final expense = Expense.fromMap(snapshot.data!.docs[index]
+                        .data() as Map<String, dynamic>);
                     return ListTile(
-                      title: Text(memberName),
-                      subtitle: Text('Amount owed: \$${amountPerMember.toStringAsFixed(2)}'),
+                      tileColor: AppColors.cardBackgroundColor,
+                      title: Text(
+                        expense.userName ?? 'Unknown',
+                        style: TextStyle(color: AppColors.primaryColor),
+                      ),
+                      subtitle: Text(
+                          'Description: ${expense.description} \n Time: ${DateFormat('HH:mm').format(expense.createdAt)} \n Date: ${DateFormat('dd:MM:yy').format(expense.createdAt)}'),
+                      trailing: Text('\$${expense.amount.toStringAsFixed(2)}'),
                     );
                   },
                 );

@@ -22,6 +22,7 @@ void main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1eGFlaGxhZm1sdWthYnVhd2RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQwOTUwOTgsImV4cCI6MjA0OTY3MTA5OH0.sbqaMjQiPG975T5GmS2eDbI7Exo9BQ_Ey03RHdbxj_w',
   );
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (_) => UserProvider(),
