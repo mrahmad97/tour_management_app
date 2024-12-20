@@ -1,14 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:tour_management_app/constants/colors.dart';
 import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/screens/dashboard_navigation_screens/emergency_contacts/emergency_contact_screen.dart';
 import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
-
+import '../../functions/fetch_realtime_service.dart';
+import '../../functions/realtime_location_service.dart';
 import '../../main.dart';
+import '../../providers/location_provider.dart';
+import '../../providers/user_provider.dart';
 import '../dashboard_navigation_screens/chat_screen.dart';
 import '../dashboard_navigation_screens/expense_screen/Expense_screen.dart';
 import '../dashboard_navigation_screens/group_members_screen.dart';
-import '../dashboard_navigation_screens/live_location_screen.dart';
+import '../dashboard_navigation_screens/location_screen/live_location_screen.dart';
 import '../dashboard_navigation_screens/profile_screen.dart';
 import '../dashboard_navigation_screens/routes_screen/route_display_screen.dart';
 
@@ -93,6 +98,38 @@ class _UserHomeState extends State<UserHome> {
         'icon': Icons.business_center,
       },
     ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final userProvider =
+        provider.Provider.of<UserProvider>(context, listen: false);
+    if (!kIsWeb) {
+      final FetchRealtimeService _fetchRealtimeService = FetchRealtimeService();
+      final RealtimeDatabaseService _realtimeDatabaseService =
+          RealtimeDatabaseService();
+
+      if (widget.groupId != null) {
+        _realtimeDatabaseService.startUpdatingLocation(
+          userProvider.user!.uid,
+          userProvider.user!.displayName,
+          widget.groupId!,
+        );
+      }
+      final locationProvider =
+          provider.Provider.of<LocationProvider>(context, listen: false);
+
+      // Start fetching users based on groupId and currentUserId
+      _fetchRealtimeService.startFetchingUsers(
+        widget.groupId!,
+        userProvider.user!.uid,
+        (updatedUsers, currentUser) {
+          locationProvider.updateUsersLocation(updatedUsers);
+          locationProvider.updateCurrentUserLocation(currentUser);
+        },
+      );
+    }
   }
 
   @override

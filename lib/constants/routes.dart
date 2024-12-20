@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tour_management_app/screens/dashboard/user_home.dart';
+import 'package:tour_management_app/screens/dashboard_navigation_screens/location_screen/web_location_screen.dart';
 import 'package:tour_management_app/screens/get_started/get_started_page.dart';
 import 'package:tour_management_app/screens/loginSignup/loginSignup_page.dart';
 import '../screens/dashboard/home_page.dart';
@@ -7,9 +8,10 @@ import '../screens/dashboard_navigation_screens/chat_screen.dart';
 import '../screens/dashboard_navigation_screens/emergency_contacts/emergency_contact_screen.dart';
 import '../screens/dashboard_navigation_screens/expense_screen/Expense_screen.dart';
 import '../screens/dashboard_navigation_screens/group_members_screen.dart';
-import '../screens/dashboard_navigation_screens/live_location_screen.dart';
+import '../screens/dashboard_navigation_screens/location_screen/live_location_screen.dart';
 import '../screens/dashboard_navigation_screens/profile_screen.dart';
 import '../screens/dashboard_navigation_screens/routes_screen/route_display_screen.dart';
+import 'package:flutter/foundation.dart';
 
 class AppRoutes {
   static const String home = '/home';
@@ -35,7 +37,7 @@ class AppRoutes {
       case home:
         return MaterialPageRoute(builder: (_) => const HomePage());
       case liveLocation:
-        return MaterialPageRoute(builder: (_) => const LiveLocationScreen());
+        return MaterialPageRoute(builder: (_) => kIsWeb ? WebLocationScreen() : LiveLocationScreen());
       case groupMembers:
         final groupId = settings.arguments as String?;
         return MaterialPageRoute(

@@ -9,6 +9,8 @@ class Strings {
   static const String welcomeBack  = 'Welcome Back';
   static const String enterCredentials = 'Enter your login credentials...';
   static const String enterCredentialsforNewACC = 'Enter your credentials to create new account...';
+  static const String ACCESS_TOKEN =
+      "pk.eyJ1IjoibXJhaG1hZDk3IiwiYSI6ImNtNG9wamdjbDAyemQybG93bDRrZzJ6cXQifQ.BD_o-PtzJEsrxbj9ktjF4A";
 
 
 }

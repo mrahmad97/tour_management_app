@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tour_management_app/functions/get_token.dart';
+import 'package:tour_management_app/providers/location_provider.dart';
 import 'package:tour_management_app/providers/user_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'constants/routes.dart';
 import 'firebase_options.dart';
+import 'models/user_location_model.dart';
 class NavigationService {
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }
@@ -26,7 +28,8 @@ void main() async {
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (_) => UserProvider(),
-    )
+    ),
+    ChangeNotifierProvider(create: (_) => LocationProvider()),
   ], child: const MyApp()));
 }
 
