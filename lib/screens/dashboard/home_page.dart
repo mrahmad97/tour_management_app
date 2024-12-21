@@ -98,12 +98,60 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildMediumScreen(BuildContext context) {
-    return _buildLargeScreen(context);
+
+    return _buildSmallScreen(context);
   }
 
   Widget _buildSmallScreen(BuildContext context) {
-    return _buildLargeScreen(context);
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildTitle(context),
+        SizedBox(
+          width: MediaQuery.of(context).size.width ,
+          height: MediaQuery.of(context).size.height *1/2,
+          child: _buildGroupTiles(context),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: AppColors.surfaceColor,
+              ),
+              onPressed: () {
+                NavigationService.navigatorKey.currentState?.push(
+                  MaterialPageRoute(builder: (context) => CreateGroupScreen()),
+                );
+              },
+              child: const Text('Create Group'),
+            ),
+            Center(
+              child: userProvider.user != null
+                  ? Text('Welcome, ${userProvider.user!.displayName}')
+                  : const Text('No user signed in'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: AppColors.surfaceColor,
+              ),
+              onPressed: () async {
+                await handleSignOut(context);
+                NavigationService.navigatorKey.currentState?.pushNamed(AppRoutes.loginSignup);
+              },
+              child: const Text('Sign out'),
+            ),
+          ],
+        ),
+      ],
+    );
   }
+
 
   Widget _buildGroupTiles(BuildContext context) {
     return FutureBuilder<List<Group>>(
@@ -123,20 +171,28 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               final group = groups[index];
 
-              return ListTile(
-                title: Text(group.name),
-                subtitle: Text(group.description),
-                trailing: IconButton(
-                  icon: const Icon(Icons.group_add),
-                  onPressed: () {
-                    _showUserSelectionDialog(context, group);
-                  },
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(10),
+                  child: ListTile(
+                    title: Text(group.name),
+                    tileColor: AppColors.cardBackgroundColor,
+                    subtitle: Text(group.description),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.group_add),
+                      onPressed: () {
+                        _showUserSelectionDialog(context, group);
+                      },
+                    ),
+                    onTap: () {
+                      NavigationService.navigatorKey.currentState?.push(
+                        MaterialPageRoute(builder: (context) => UserHome(groupId: group.id)),
+                      );
+                    },
+                  ),
                 ),
-                onTap: () {
-                  NavigationService.navigatorKey.currentState?.push(
-                    MaterialPageRoute(builder: (context) => UserHome(groupId: group.id)),
-                  );
-                },
               );
             },
           );

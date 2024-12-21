@@ -78,6 +78,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                   itemBuilder: (context, index) {
                     final contact = contacts[index];
                     return Card(
+                      elevation: 4,
                       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       child: ListTile(
                         tileColor: AppColors.cardBackgroundColor,

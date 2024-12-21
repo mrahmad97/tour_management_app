@@ -107,15 +107,21 @@ class _ExpenseSummaryScreenState extends State<ExpenseSummaryScreen> {
                   itemBuilder: (context, index) {
                     final expense = Expense.fromMap(snapshot.data!.docs[index]
                         .data() as Map<String, dynamic>);
-                    return ListTile(
-                      tileColor: AppColors.cardBackgroundColor,
-                      title: Text(
-                        expense.userName ?? 'Unknown',
-                        style: TextStyle(color: AppColors.primaryColor),
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                      child: Material(
+                        elevation: 4,
+                        child: ListTile(
+                          tileColor: AppColors.cardBackgroundColor,
+                          title: Text(
+                            expense.userName ?? 'Unknown',
+                            style: TextStyle(color: AppColors.primaryTextColor),
+                          ),
+                          subtitle: Text(
+                              'Description: ${expense.description} \n Time: ${DateFormat('HH:mm').format(expense.createdAt)} \n Date: ${DateFormat('dd:MM:yy').format(expense.createdAt)}'),
+                          trailing: Text('\$${expense.amount.toStringAsFixed(2)}',style: TextStyle(color: AppColors.primaryColor,fontWeight: FontWeight.bold,fontSize: 14),),
+                        ),
                       ),
-                      subtitle: Text(
-                          'Description: ${expense.description} \n Time: ${DateFormat('HH:mm').format(expense.createdAt)} \n Date: ${DateFormat('dd:MM:yy').format(expense.createdAt)}'),
-                      trailing: Text('\$${expense.amount.toStringAsFixed(2)}'),
                     );
                   },
                 );

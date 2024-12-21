@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tour_management_app/constants/colors.dart';
 import 'package:tour_management_app/functions/get_token.dart';
 import 'package:tour_management_app/providers/location_provider.dart';
 import 'package:tour_management_app/providers/user_provider.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: NavigationService.navigatorKey,
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryColor,primary: AppColors.primaryColor,surface: AppColors.surfaceColor)),
       title: 'Tour Management App',
       initialRoute: UniversalPlatform.isWeb
           ? AppRoutes.loginSignup

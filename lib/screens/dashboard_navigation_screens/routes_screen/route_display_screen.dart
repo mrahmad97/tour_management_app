@@ -111,26 +111,30 @@ class _RouteDisplayScreenState extends State<RouteDisplayScreen> {
     return Card(
       color: AppColors.cardBackgroundColor,
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: ListTile(
-        title: Text(route.heading,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Type: ${route.typeOfStop}'),
-            Text('Starting Time: ${DateFormat('HH:mm').format(route.startingTime)}'),
-            Text('Starting Date: ${DateFormat('dd:MM:yy').format(route.startingTime)}'),
-            Text('Starting Location: ${route.startingFrom}'),
-            Text('Ending Location: ${route.endingAt}'),
-            Text('Ending Time: ${DateFormat('HH:mm').format(route.endingTime)}'),
-            Text('Ending Date: ${DateFormat('dd:MM:yy').format(route.endingTime)}'),
-          ],
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.info),
-          onPressed: () {
-            _showRouteDetails(route);
-          },
+      child: Material(
+        elevation: 4,
+        child: ListTile(
+          tileColor: AppColors.cardBackgroundColor,
+          title: Text(route.heading,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Type: ${route.typeOfStop}'),
+              Text('Starting Time: ${DateFormat('HH:mm').format(route.startingTime)}'),
+              Text('Starting Date: ${DateFormat('dd:MM:yy').format(route.startingTime)}'),
+              Text('Starting Location: ${route.startingFrom}'),
+              Text('Ending Location: ${route.endingAt}'),
+              Text('Ending Time: ${DateFormat('HH:mm').format(route.endingTime)}'),
+              Text('Ending Date: ${DateFormat('dd:MM:yy').format(route.endingTime)}'),
+            ],
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.info),
+            onPressed: () {
+              _showRouteDetails(route);
+            },
+          ),
         ),
       ),
     );

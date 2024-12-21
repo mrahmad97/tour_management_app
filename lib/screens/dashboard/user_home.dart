@@ -38,12 +38,14 @@ class _UserHomeState extends State<UserHome> {
               AppRoutes.chat,
               arguments: widget.groupId,
             ),
+        'image': 'assets/chat.png',
         'icon': Icons.chat,
       },
       {
         'title': 'Live Location',
         'navigateTo': () => NavigationService.navigatorKey.currentState
             ?.pushNamed(AppRoutes.liveLocation),
+        'image': 'assets/map.png',
         'icon': Icons.location_on,
       },
       {
@@ -53,7 +55,9 @@ class _UserHomeState extends State<UserHome> {
               AppRoutes.groupMembers,
               arguments: widget.groupId,
             ),
+        'image': 'assets/group.png',
         'icon': Icons.group,
+
       },
       {
         'title': 'Route',
@@ -62,13 +66,17 @@ class _UserHomeState extends State<UserHome> {
               AppRoutes.routeDisplay,
               arguments: widget.groupId,
             ),
+        'image': 'assets/route.png',
         'icon': Icons.map,
+
       },
       {
         'title': 'Emergency Contact',
         'navigateTo': () => NavigationService.navigatorKey.currentState
             ?.pushNamed(AppRoutes.emergencyContact),
+        'image': 'assets/emergency_contact.png',
         'icon': Icons.contact_phone,
+
       },
       {
         'title': 'Profile',
@@ -77,7 +85,9 @@ class _UserHomeState extends State<UserHome> {
               AppRoutes.profile,
               arguments: {'groupId': widget.groupId},
             ),
+        'image': 'assets/profile.png',
         'icon': Icons.person,
+
       },
       {
         'title': 'Expense',
@@ -86,7 +96,9 @@ class _UserHomeState extends State<UserHome> {
               AppRoutes.addExpense,
               arguments: widget.groupId,
             ),
+        'image': 'assets/expense.png',
         'icon': Icons.attach_money,
+
       },
       {
         'title': 'Manager Details',
@@ -95,7 +107,9 @@ class _UserHomeState extends State<UserHome> {
               AppRoutes.managerDetails,
               arguments: widget.groupId,
             ),
+        'image': 'assets/manager.png',
         'icon': Icons.business_center,
+
       },
     ];
   }
@@ -218,10 +232,12 @@ class _UserHomeState extends State<UserHome> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      feature['icon'],
-                      size: 40,
-                      color: AppColors.primaryColor,
+                    SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: Image.asset(
+                        feature['image'],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(

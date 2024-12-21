@@ -215,7 +215,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 message.message!,
                 style: TextStyle(
                     color:
-                        isMe ? AppColors.surfaceColor : AppColors.primaryColor),
+                        isMe ? AppColors.surfaceColor : AppColors.primaryTextColor),
               ),
             Text(
               message.timestamp != null
@@ -224,7 +224,7 @@ class _ChatScreenState extends State<ChatScreen> {
               style: TextStyle(
                   fontSize: 10,
                   color:
-                      isMe ? AppColors.surfaceColor : AppColors.primaryColor),
+                      isMe ? AppColors.surfaceColor : AppColors.primaryTextColor),
             ),
           ],
         ),
