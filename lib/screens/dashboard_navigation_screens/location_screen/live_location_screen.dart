@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:tour_management_app/constants/strings.dart';
 import 'package:tour_management_app/models/user_location_model.dart';
 import 'package:tour_management_app/providers/location_provider.dart';
-
 import '../../../constants/colors.dart';
 
 class LiveLocationScreen extends StatefulWidget {
@@ -17,6 +16,8 @@ class LiveLocationScreen extends StatefulWidget {
 class _LiveLocationScreenState extends State<LiveLocationScreen> {
   late MapboxMap mapboxMap;
   bool _debugLoggingEnabled = false;
+  double _iconBottom = 70.0; // Initial position of the movable icon
+  double _iconRight = 30.0;
 
   @override
   void initState() {
@@ -53,6 +54,7 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
       }
 
       print("Processed location for user: $userName at [$longitude, $latitude]");
+
       return '''
       {
         "type": "Feature",
@@ -92,6 +94,8 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
       textField: "{title}",
       textSize: 12, // Adjust text size
       textOffset: [0, 1.5], // Offset text above the marker
+      iconAllowOverlap: true, // Allow icons to overlap (for clustering)
+      textAllowOverlap: true, // Allow text to overlap
     );
 
     await mapboxMap.style.addLayer(symbolLayer);
@@ -140,11 +144,43 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
         backgroundColor: AppColors.primaryColor,
       ),
       drawer: _buildDrawer(context),
-      body: SizedBox(
-        child: MapWidget(
-          onMapCreated: _onMapCreated,
-          textureView: true, // Ensures compatibility with non-AppCompat themes
-        ),
+      body: Stack(
+        children: [
+          SizedBox(
+            child: MapWidget(
+              onMapCreated: _onMapCreated,
+              textureView: true, // Ensures compatibility with non-AppCompat themes
+            ),
+          ),
+          Positioned(
+            bottom: _iconBottom,
+            right: _iconRight,
+            child: GestureDetector(
+              onTap: () {
+                // Move the camera to the current user location
+                final locationProvider = Provider.of<LocationProvider>(context, listen: false);
+                final currentUserLocation = locationProvider.currentUserLocation;
+
+                if (currentUserLocation != null) {
+                  _moveCameraToUserLocation(
+                    latitude: currentUserLocation.latitude,
+                    longitude: currentUserLocation.longitude,
+                    username: "Current User",
+                  );
+                }
+              },
+              child: CircleAvatar(
+                radius: 25,
+                backgroundColor: AppColors.primaryColor,
+                child: Icon(
+                  Icons.location_on,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

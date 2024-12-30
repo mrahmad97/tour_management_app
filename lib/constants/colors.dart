@@ -9,9 +9,6 @@ class AppColors {
   static const Color cardTextColor =
   Color(0xFF6A6A6A); // Card background color
   static const Color primaryTextColor = Color(0xFF242424); // Primary color
-
-
-
   static const Color iconColor = Color(0xFF939393); // Icon color
   static const Color surfaceColor = Color(0xFFE9EFEC); // Surface color (white)
   static const Color surfaceColorBlur = Color(0x80FFFFFF); // Surface color (white)

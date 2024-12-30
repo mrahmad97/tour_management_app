@@ -57,6 +57,7 @@ dependencies:
   geolocator: ^13.0.2
   location: ^7.0.1
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -67,6 +68,19 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.3
+  flutter_launcher_icons: ^0.14.2
+
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/tours.png
+  android: true
+  ios: true
+
+flutter_icons:
+  android: true
+  image_path: "assets/tours.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

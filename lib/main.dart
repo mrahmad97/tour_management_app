@@ -9,9 +9,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'constants/routes.dart';
 import 'firebase_options.dart';
-import 'models/user_location_model.dart';
+
 class NavigationService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 }
 
 void main() async {
@@ -41,7 +42,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: NavigationService.navigatorKey,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryColor,primary: AppColors.primaryColor,surface: AppColors.surfaceColor)),
+      theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.primaryColor,
+              primary: AppColors.primaryColor,
+              surface: AppColors.surfaceColor)),
       title: 'Tour Management App',
       initialRoute: UniversalPlatform.isWeb
           ? AppRoutes.loginSignup

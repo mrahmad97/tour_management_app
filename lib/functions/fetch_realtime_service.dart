@@ -7,7 +7,7 @@ class FetchRealtimeService {
   StreamSubscription? _streamSubscription;
 
   void startFetchingUsers(
-      String groupId,
+      String? groupId,
       String currentUserId,
       Function(List<UserLocationModel>, UserLocationModel?) onUpdate,
       ) {

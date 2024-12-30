@@ -4,6 +4,7 @@ import 'package:provider/provider.dart' as provider;
 import 'package:tour_management_app/constants/colors.dart';
 import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/screens/dashboard_navigation_screens/emergency_contacts/emergency_contact_screen.dart';
+import 'package:tour_management_app/screens/dashboard_navigation_screens/location_screen/web_location_screen.dart';
 import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
 import '../../functions/fetch_realtime_service.dart';
 import '../../functions/realtime_location_service.dart';
@@ -13,7 +14,6 @@ import '../../providers/user_provider.dart';
 import '../dashboard_navigation_screens/chat_screen.dart';
 import '../dashboard_navigation_screens/expense_screen/Expense_screen.dart';
 import '../dashboard_navigation_screens/group_members_screen.dart';
-import '../dashboard_navigation_screens/location_screen/live_location_screen.dart';
 import '../dashboard_navigation_screens/profile_screen.dart';
 import '../dashboard_navigation_screens/routes_screen/route_display_screen.dart';
 
@@ -38,7 +38,7 @@ class _UserHomeState extends State<UserHome> {
               AppRoutes.chat,
               arguments: widget.groupId,
             ),
-        'image': 'assets/chat.png',
+        'image': 'assets/chat .png',
         'icon': Icons.chat,
       },
       {
@@ -57,7 +57,6 @@ class _UserHomeState extends State<UserHome> {
             ),
         'image': 'assets/group.png',
         'icon': Icons.group,
-
       },
       {
         'title': 'Route',
@@ -68,7 +67,6 @@ class _UserHomeState extends State<UserHome> {
             ),
         'image': 'assets/route.png',
         'icon': Icons.map,
-
       },
       {
         'title': 'Emergency Contact',
@@ -76,7 +74,6 @@ class _UserHomeState extends State<UserHome> {
             ?.pushNamed(AppRoutes.emergencyContact),
         'image': 'assets/emergency_contact.png',
         'icon': Icons.contact_phone,
-
       },
       {
         'title': 'Profile',
@@ -87,7 +84,6 @@ class _UserHomeState extends State<UserHome> {
             ),
         'image': 'assets/profile.png',
         'icon': Icons.person,
-
       },
       {
         'title': 'Expense',
@@ -98,7 +94,6 @@ class _UserHomeState extends State<UserHome> {
             ),
         'image': 'assets/expense.png',
         'icon': Icons.attach_money,
-
       },
       {
         'title': 'Manager Details',
@@ -109,7 +104,6 @@ class _UserHomeState extends State<UserHome> {
             ),
         'image': 'assets/manager.png',
         'icon': Icons.business_center,
-
       },
     ];
   }
@@ -136,7 +130,7 @@ class _UserHomeState extends State<UserHome> {
 
       // Start fetching users based on groupId and currentUserId
       _fetchRealtimeService.startFetchingUsers(
-        widget.groupId!,
+        widget.groupId,
         userProvider.user!.uid,
         (updatedUsers, currentUser) {
           locationProvider.updateUsersLocation(updatedUsers);
@@ -151,7 +145,7 @@ class _UserHomeState extends State<UserHome> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Dashboard',
+          'User Dashboard',
           style: TextStyle(color: AppColors.surfaceColor),
         ),
         backgroundColor: AppColors.primaryColor,
@@ -159,13 +153,10 @@ class _UserHomeState extends State<UserHome> {
       ),
       backgroundColor: AppColors.surfaceColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-          child: ResponsiveWidget(
-            largeScreen: _buildLargeScreen(context),
-            mediumScreen: _buildMediumScreen(context),
-            smallScreen: _buildSmallScreen(context),
-          ),
+        child: ResponsiveWidget(
+          largeScreen: _buildLargeScreen(context),
+          mediumScreen: _buildMediumScreen(context),
+          smallScreen: _buildSmallScreen(context),
         ),
       ),
     );
@@ -201,7 +192,39 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildSmallScreen(BuildContext context) {
-    return _buildGridItems(context);
+    final user = provider.Provider.of<UserProvider>(context).user;
+    final name = user?.displayName;
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.height * 1 / 4,
+            width: MediaQuery.of(context).size.width,
+            color: AppColors.categoryBackgroundColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/tours.png'),
+                Text(
+                  'Welcome $name',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.surfaceColor),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          _buildListItemsMobile(context),
+        ],
+      ),
+    );
   }
 
   Widget _buildGridItems(BuildContext context) {
@@ -256,6 +279,51 @@ class _UserHomeState extends State<UserHome> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildListItemsMobile(BuildContext context) {
+    final features = getFeatures(context);
+
+    return Column(
+      children: features.map((feature) {
+        return GestureDetector(
+          onTap: feature['navigateTo'],
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            color: AppColors.cardBackgroundColor,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  // Feature Image
+                  SizedBox(
+                    height: 60,
+                    width: 60,
+                    child: Image.asset(feature['image']),
+                  ),
+                  const SizedBox(width: 16),
+                  // Feature Title
+                  Expanded(
+                    child: Text(
+                      feature['title'],
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -344,7 +412,7 @@ class SideScreen extends StatelessWidget {
       case 0:
         return ChatScreen(groupId: groupId);
       case 1:
-        return LiveLocationScreen();
+        return WebLocationScreen();
       case 2:
         return GroupMembersScreen(groupId: groupId);
       case 3:

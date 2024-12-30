@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tour_management_app/constants/colors.dart';
-import 'package:tour_management_app/functions/push_notification_service.dart';
 import 'package:tour_management_app/main.dart';
 import 'package:tour_management_app/screens/dashboard/user_home.dart';
 import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
@@ -29,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text('Manager Dashboard', style: TextStyle(color: AppColors.surfaceColor),),backgroundColor: AppColors.primaryColor,),
       backgroundColor: AppColors.surfaceColor,
       body: SingleChildScrollView(
         child: SafeArea(
@@ -49,7 +49,6 @@ class _HomePageState extends State<HomePage> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildTitle(context),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -109,7 +108,6 @@ class _HomePageState extends State<HomePage> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildTitle(context),
         SizedBox(
           width: MediaQuery.of(context).size.width ,
           height: MediaQuery.of(context).size.height *1/2,
