@@ -7,6 +7,7 @@ import 'package:tour_management_app/constants/routes.dart';
 import 'package:tour_management_app/models/login_model.dart';
 import 'package:tour_management_app/screens/dashboard/user_home.dart';
 import 'package:tour_management_app/screens/global_components/responsive_widget.dart';
+import 'package:tour_management_app/screens/loginSignup/components/forget_password_screen.dart';
 
 import '../../../constants/colors.dart'; // Ensure AppColors is defined
 import '../../../constants/strings.dart'; // Ensure Strings.login is defined
@@ -86,8 +87,7 @@ class _LoginFormState extends State<LoginForm> {
       }
 
       // Navigate based on user type and pass the groupId if user
-      if (userDoc['userType'].toLowerCase() == 'user')
-      {
+      if (userDoc['userType'].toLowerCase() == 'user') {
         NavigationService.navigatorKey.currentState?.push(MaterialPageRoute(
           builder: (context) => UserHome(
             groupId: groupId,
@@ -103,13 +103,30 @@ class _LoginFormState extends State<LoginForm> {
       );
     } on FirebaseAuthException catch (e) {
       String errorMessage;
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Incorrect password provided.';
-      } else {
-        errorMessage = 'An error occurred. Please try again.';
+
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found for that email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password provided.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is invalid.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This user account has been disabled.';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many attempts. Please try again later.';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'This operation is not allowed.';
+          break;
+        default:
+          errorMessage = 'Error: ${e.code}';
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
@@ -222,7 +239,9 @@ class _LoginFormState extends State<LoginForm> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ForgotPasswordScreen(),));
+                },
                 child: Text(
                   'Forgot Password?',
                   style: TextStyle(

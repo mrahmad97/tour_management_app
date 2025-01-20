@@ -251,9 +251,14 @@ class _ChatScreenState extends State<ChatScreen> {
           title: const Text('Chat',
               style: TextStyle(color: AppColors.surfaceColor)),
           backgroundColor: AppColors.primaryColor,
+          automaticallyImplyLeading: kIsWeb ? false :true,
+          iconTheme: IconThemeData(color: AppColors.surfaceColor),
+
+
         ),
         backgroundColor: AppColors.surfaceColor,
         resizeToAvoidBottomInset: true, // Enable resizing to avoid bottom inset
+
         body: Column(
           children: [
             Expanded(

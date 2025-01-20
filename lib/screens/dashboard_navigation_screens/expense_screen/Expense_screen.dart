@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tour_management_app/constants/colors.dart';
@@ -35,6 +36,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       return 'Please enter a valid number.';
     }
 
+    if (numValue < 0) {
+      return 'Negative numbers are not allowed.';
+    }
+
     if (numValue <= 100) {
       return 'Number must be greater than 100.';
     }
@@ -45,6 +50,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     return null;
   }
+
 
   String? _validateDescription(String? value) {
     if (value == null || value.isEmpty) {
@@ -97,7 +103,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           'Add Expense',
           style: TextStyle(color: AppColors.surfaceColor),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: kIsWeb ? false :true,
+        iconTheme: IconThemeData(color: AppColors.surfaceColor),
+
         backgroundColor: AppColors.primaryColor,
       ),
       backgroundColor: AppColors.surfaceColor,

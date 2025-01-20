@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tour_management_app/constants/colors.dart';
@@ -66,8 +67,13 @@ class _ExpenseSummaryScreenState extends State<ExpenseSummaryScreen> {
           'Expense Summary',
           style: TextStyle(color: AppColors.surfaceColor),
         ),
+        automaticallyImplyLeading: kIsWeb ? false :true,
+        iconTheme: IconThemeData(color: AppColors.surfaceColor),
+
+
       ),
       backgroundColor: AppColors.surfaceColor,
+
       body: Column(
         children: [
           Padding(

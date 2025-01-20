@@ -207,7 +207,10 @@ class _UserHomeState extends State<UserHome> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/tours.png'),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 1 / 5,
+                  child: Image.asset('assets/tours.png'),
+                ),
                 Text(
                   'Welcome $name',
                   style: TextStyle(

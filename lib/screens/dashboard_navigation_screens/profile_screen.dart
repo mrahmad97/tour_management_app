@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tour_management_app/constants/colors.dart';
@@ -96,8 +97,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           widget.isManagerProfile ? 'Manager Profile' : 'Profile',
           style: TextStyle(color: AppColors.surfaceColor),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: kIsWeb ? false :true,
+      iconTheme: IconThemeData(color: AppColors.surfaceColor),
       ),
+
       backgroundColor: AppColors.surfaceColor,
       body: userProfile == null
           ? const Center(child: Text('User not found.'))

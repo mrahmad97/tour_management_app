@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tour_management_app/functions/generate_location_link.dart';
 import 'package:tour_management_app/providers/user_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/colors.dart';
 import '../../../models/emergency_contact_model.dart';
@@ -18,6 +21,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   Widget build(BuildContext context) {
     final user =
         Provider.of<UserProvider>(context).user!; // Get current user ID
+    final LocationLink _locationLink = LocationLink();
 
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +29,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           'Emergency Contacts',
           style: TextStyle(color: AppColors.surfaceColor),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: kIsWeb ? false :true,
+        iconTheme: IconThemeData(color: AppColors.surfaceColor),
+
         backgroundColor: AppColors.primaryColor,
       ),
       backgroundColor: AppColors.surfaceColor,
@@ -89,6 +95,21 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                             Text('Contact: ${contact.contactNumber}'),
                             Text('Relation: ${contact.relation}'),
                           ],
+                        ),
+                        trailing: IconButton(
+                          onPressed: () async {
+                            final link = await _locationLink.generateLocationLink(); // Fetch location link
+                            final phoneNumber = contact.contactNumber;
+                            final message = 'Here is my live location: $link';
+
+                            final Uri smsUri = Uri.parse('sms:$phoneNumber?body=$message');
+                            if (await canLaunch(smsUri.toString())) {
+                              await launch(smsUri.toString());
+                            } else {
+                              print('Could not launch SMS');
+                            }
+                          },
+                          icon: Icon(Icons.share_location),
                         ),
                       ),
                     );

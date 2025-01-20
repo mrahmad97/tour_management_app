@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tour_management_app/constants/colors.dart';
 import 'package:tour_management_app/screens/global_components/custom_text_field.dart';
@@ -66,7 +67,9 @@ class _AddEmergencyContactScreenState extends State<AddEmergencyContactScreen> {
           style: TextStyle(color: AppColors.surfaceColor),
         ),
         backgroundColor: AppColors.primaryColor,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: kIsWeb ? false : true,
+        iconTheme: IconThemeData(color: AppColors.surfaceColor),
+
       ),
       backgroundColor: AppColors.surfaceColor,
       body: Padding(
