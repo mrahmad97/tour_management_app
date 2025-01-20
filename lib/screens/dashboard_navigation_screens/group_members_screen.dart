@@ -57,6 +57,7 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final currentUser = Provider.of<UserProvider>(context).user;
